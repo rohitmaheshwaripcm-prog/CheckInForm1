@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Hotel Check-In Application</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #f7f7f7;
+    margin: 0; padding: 0;
+  }
+  header {
+    background: #003366;
+    color: white;
+    text-align: center;
+    padding: 10px;
+  }
+  nav {
+    background: #0059b3;
+    display: flex;
+    flex-wrap: wrap;
+  }
+  nav button {
+    background: none;
+    border: none;
+    color: white;
+    padding: 12px 15px;
+    cursor: pointer;
+    font-size: 16px;
+    flex: 1;
+  }
+  nav button:hover {
+    background-color: #0073e6;
+  }
+  section {
+    padding: 20px;
+  }
+  form input, form select {
+    display: block;
+    margin: 10px 0;
+    padding: 8px;
+    width: calc(100% - 20px);
+    max-width: 400px;
+  }
+  .submit-btn {
+    background-color: #0059b3;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    margin-top: 10px;
+    cursor: pointer;
+  }
+  .submit-btn:hover {
+    background-color: #003366;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+  }
+  table, th, td {
+    border: 1px solid #ddd;
+  }
+  th, td {
+    padding: 10px;
+    text-align: left;
+  }
+  th {
+    background-color: #003366;
+    color: white;
+  }
+  .hidden {
+    display: none;
+  }
+  #searchBar {
+    margin: 10px 0;
+    padding: 8px;
+    width: 300px;
+    max-width: 100%;
+  }
+  /* Modal styles */
+  .modal {
+    display: none; 
+    position: fixed; 
+    z-index: 1000; 
+    padding-top: 60px; 
+    left: 0; top: 0; width: 100%; height: 100%; 
+    overflow: auto; 
+    background-color: rgba(0,0,0,0.5);
+  }
+  .modal-content {
+    background-color: #fefefe;
+    margin: auto; padding: 20px;
+    border: 1px solid #888;
+    width: 90%;
+    max-width: 600px;
+  }
+  .close-btn {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  .close-btn:hover {
+    color: #000;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Hotel Check-In Application</h1>
+</header>
+
+<nav>
+  <button onclick="showSection('checkIn')">Check In Sheet</button>
+  <button onclick="showSection('inHouse')">In House Guests</button>
+  <button onclick="showSection('viewRecords')">View Records</button>
+</nav>
+
+<section id="checkIn">
+  <h2>Check In Sheet</h2>
+  <form id="checkInForm">
+    <input type="text" name="name" placeholder="Name *" required />
+    <input type="tel" name="phone" pattern="[0-9]{10}" placeholder="Phone Number *" required />
+    <input type="text" name="address" placeholder="Address *" required />
+    <input type="text" name="city" placeholder="City *" required />
+    <input type="text" name="pin" placeholder="Pin Code *" required />
+    <label>Check-In Date *</label>
+    <input type="date" name="checkin" required />
+    <label>Check-Out Date *</label>
+    <input type="date" name="checkout" required />
+    <input type="number" name="adults" placeholder="Adults *" required />
+    <input type="number" name="children" placeholder="Children *" required />
+    <input type="text" name="comingFrom" placeholder="Coming From *" required />
+    <input type="text" name="goingTo" placeholder="Going To *" required />
+    <label>Plan *</label>
+    <select name="plan" required>
+      <option value="">Select Plan</option>
+      <option>EP (Room Only)</option>
+      <option>CP (Breakfast)</option>
+      <option>MAP (Breakfast & Lunch)</option>
+      <option>AP (All Meals)</option>
+    </select>
+    <input type="number" name="rooms" placeholder="Rooms *" required />
+    <input type="text" name="roomNo" placeholder="Room Number *" required />
+    <input type="text" name="vehicle" placeholder="Vehicle Number" />
+    <label>Booking Reference *</label>
+    <select name="bookingRef" required>
+      <option value="">Select Reference</option>
+      <option>OTA</option>
+      <option>Walk In</option>
+      <option>Reservations</option>
+      <option>State Bank of India</option>
+      <option>Bank of India</option>
+    </select>
+    <button type="submit" class="submit-btn">Check In</button>
+  </form>
+  <p id="msg"></p>
+</section>
+
+<section id="inHouse" class="hidden">
+  <h2>In House Guests</h2>
+  <p>Guests are automatically removed after 12:00 noon on their checkout date.</p>
+  <table id="inHouseTable">
+    <tr><th>Reg. No.</th><th>Name</th><th>Phone</th><th>Room No.</th><th>Check In</th><th>Check Out</th><th>Plan</th><th>Booking Ref</th><th>No of Persons</th></tr>
+  </table>
+</section>
+
+<section id="viewRecords" class="hidden">
+  <h2>View Records</h2>
+  <input type="text" id="searchBar" placeholder="Search all records..." oninput="filterRecords()" />
+  <button onclick="exportFilteredCsv()" style="margin-top: 10px;">Export Filtered as CSV</button>
+  <table id="recordsTable">
+    <tr>
+      <th>Reg. No.</th><th>Name</th><th>Phone</th><th>Address</th><th>City</th><th>Pin</th><th>Adults</th><th>Children</th><th>Coming From</th><th>Going To</th><th>Plan</th><th>Rooms</th><th>Room No.</th><th>Vehicle No.</th><th>Booking Ref</th><th>Check In</th><th>Check Out</th><th>Actions</th>
+    </tr>
+  </table>
+</section>
+
+<!-- Edit Modal -->
+<div id="editModal" class="modal">
+  <div class="modal-content">
+    <span class="close-btn" id="closeModal">&times;</span>
+    <h3>Edit Check-In Record</h3>
+    <form id="editForm">
+      <input type="hidden" name="regNo" />
+      <input type="text" name="name" placeholder="Name *" required />
+      <input type="tel" name="phone" pattern="[0-9]{10}" placeholder="Phone Number *" required />
+      <input type="text" name="address" placeholder="Address *" required />
+      <input type="text" name="city" placeholder="City *" required />
+      <input type="text" name="pin" placeholder="Pin Code *" required />
+      <input type="number" name="adults" placeholder="Adults *" required />
+      <input type="number" name="children" placeholder="Children *" required />
+      <input type="text" name="comingFrom" placeholder="Coming From *" required />
+      <input type="text" name="goingTo" placeholder="Going To *" required />
+      <select name="plan" required>
+        <option>EP (Room Only)</option>
+        <option>CP (Breakfast)</option>
+        <option>MAP (Breakfast & Lunch)</option>
+        <option>AP (All Meals)</option>
+      </select>
+      <input type="number" name="rooms" placeholder="Rooms *" required />
+      <input type="text" name="roomNo" placeholder="Room Number *" required />
+      <input type="text" name="vehicle" placeholder="Vehicle Number" />
+      <select name="bookingRef" required>
+        <option>OTA</option>
+        <option>Walk In</option>
+        <option>Reservations</option>
+        <option>State Bank of India</option>
+        <option>Bank of India</option>
+      </select>
+      <label>Check-In Date *</label>
+      <input type="date" name="checkin" required />
+      <label>Check-Out Date *</label>
+      <input type="date" name="checkout" required />
+      <button type="submit" class="submit-btn">Save Changes</button>
+    </form>
+  </div>
+</div>
+
+<script>
+const PASSWORD = "0105";
+
+let records = JSON.parse(localStorage.getItem('records')) || [];
+let regCounter = Number(localStorage.getItem('regCounter')) || 1;
+
+function formatDate(dateStr) {
+  const d = new Date(dateStr);
+  return `${d.getDate().toString().padStart(2,'0')}-${(d.getMonth()+1).toString().padStart(2,'0')}-${d.getFullYear()}`;
+}
+
+function showSection(id) {
+  document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
+  document.getElementById(id).classList.remove('hidden');
+  if(id === 'viewRecords') {
+    filterRecords(); // refresh table on view
+  }
+}
+
+// Check In form submission
+document.getElementById('checkInForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const f = e.target;
+  const data = {
+    regNo: 'HP' + String(regCounter).padStart(3, '0'),
+    name: f.name.value.toLowerCase(),
+    phone: f.phone.value.toLowerCase(),
+    address: f.address.value.toLowerCase(),
+    city: f.city.value.toLowerCase(),
+    pin: f.pin.value.toLowerCase(),
+    adults: parseInt(f.adults.value),
+    children: parseInt(f.children.value),
+    comingFrom: f.comingFrom.value.toLowerCase(),
+    goingTo: f.goingTo.value.toLowerCase(),
+    plan: f.plan.value.toLowerCase(),
+    rooms: parseInt(f.rooms.value),
+    roomNo: f.roomNo.value.toLowerCase(),
+    vehicle: f.vehicle.value.toLowerCase(),
+    bookingRef: f.bookingRef.value.toLowerCase(),
+    checkin: formatDate(f.checkin.value),
+    checkout: formatDate(f.checkout.value),
+    rawCheckIn: f.checkin.value,
+    rawCheckOut: f.checkout.value,
+  };
+  records.push(data);
+  localStorage.setItem('records', JSON.stringify(records));
+  regCounter++;
+  localStorage.setItem('regCounter', regCounter);
+  filterRecords();
+  f.reset();
+  document.getElementById('msg').textContent = 'Guest Checked In Successfully!';
+  setTimeout(() => document.getElementById('msg').textContent = '', 2000);
+});
+
+// Get current guests for In House tab only
+function getCurrentGuests() {
+  const now = new Date();
+  const todayMidday = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12, 0, 0);
+  return records.filter(r => new Date(r.rawCheckOut) >= todayMidday);
+}
+
+// Update both tables (In House & View Records)
+let filteredRecords = [];
+function updateTables() {
+  const inHouse = document.getElementById('inHouseTable');
+  const recordsTable = document.getElementById('recordsTable');
+  inHouse.innerHTML = `<tr>
+    <th>Reg. No.</th><th>Name</th><th>Phone</th><th>Room No.</th><th>Check In</th><th>Check Out</th><th>Plan</th><th>Booking Ref</th><th>No of Persons</th></tr>`;
+  recordsTable.innerHTML = `<tr>
+    <th>Reg. No.</th><th>Name</th><th>Phone</th><th>Address</th><th>City</th><th>Pin</th>
+    <th>Adults</th><th>Children</th><th>Coming From</th><th>Going To</th><th>Plan</th><th>Rooms</th>
+    <th>Room No.</th><th>Vehicle No.</th><th>Booking Ref</th><th>Check In</th><th>Check Out</th><th>Actions</th></tr>`;
+
+  getCurrentGuests().forEach(r => {
+    let row = inHouse.insertRow();
+    row.insertCell(0).textContent = r.regNo;
+    row.insertCell(1).textContent = capitalize(r.name);
+    row.insertCell(2).textContent = r.phone;
+    row.insertCell(3).textContent = r.roomNo;
+    row.insertCell(4).textContent = r.checkin;
+    row.insertCell(5).textContent = r.checkout;
+    row.insertCell(6).textContent = capitalize(r.plan);
+    row.insertCell(7).textContent = capitalize(r.bookingRef);
+    row.insertCell(8).textContent = r.adults + r.children;
+  });
+
+  filteredRecords.forEach(r => {
+    let row = recordsTable.insertRow();
+    row.insertCell(0).textContent = r.regNo;
+    row.insertCell(1).textContent = capitalize(r.name);
+    row.insertCell(2).textContent = r.phone;
+    row.insertCell(3).textContent = capitalize(r.address);
+    row.insertCell(4).textContent = capitalize(r.city);
+    row.insertCell(5).textContent = r.pin;
+    row.insertCell(6).textContent = r.adults;
+    row.insertCell(7).textContent = r.children;
+    row.insertCell(8).textContent = capitalize(r.comingFrom);
+    row.insertCell(9).textContent = capitalize(r.goingTo);
+    row.insertCell(10).textContent = capitalize(r.plan);
+    row.insertCell(11).textContent = r.rooms;
+    row.insertCell(12).textContent = r.roomNo;
+    row.insertCell(13).textContent = r.vehicle;
+    row.insertCell(14).textContent = capitalize(r.bookingRef);
+    row.insertCell(15).textContent = r.checkin;
+    row.insertCell(16).textContent = r.checkout;
+
+    let actionCell = row.insertCell(17);
+    let btnDelete = document.createElement('button');
+    btnDelete.textContent = 'Delete';
+    btnDelete.onclick = () => {
+      let pw = prompt('Enter password to delete:');
+      if (pw === PASSWORD) {
+        deleteRecord(r.regNo);
+      } else {
+        alert('Incorrect password');
+      }
+    };
+    let btnEdit = document.createElement('button');
+    btnEdit.textContent = 'Edit';
+    btnEdit.style.marginLeft = '10px';
+    btnEdit.onclick = () => {
+      let pw = prompt('Enter password to edit record:');
+      if (pw === PASSWORD) {
+        openEditModal(r.regNo);
+      } else {
+        alert('Incorrect password');
+      }
+    };
+    actionCell.appendChild(btnDelete);
+    actionCell.appendChild(btnEdit);
+  });
+}
+
+function capitalize(s) {
+  if (!s) return s;
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
+// Search filter
+function filterRecords() {
+  const query = document.getElementById('searchBar').value.toLowerCase();
+  filteredRecords = records.filter(r =>
+    Object.values(r).some(val => val && val.toString().toLowerCase().includes(query))
+  );
+  updateTables();
+}
+
+// Delete record function
+function deleteRecord(regNo) {
+  records = records.filter(r => r.regNo !== regNo);
+  filteredRecords = filteredRecords.filter(r => r.regNo !== regNo);
+  localStorage.setItem('records', JSON.stringify(records));
+  updateTables();
+}
+
+// Export filtered records as CSV
+function exportFilteredCsv() {
+  if (filteredRecords.length === 0) {
+    alert('No records to export');
+    return;
+  }
+  const headers = [
+    'Reg. No.', 'Name', 'Phone', 'Address', 'City', 'Pin',
+    'Adults', 'Children', 'Coming From', 'Going To',
+    'Plan', 'Rooms', 'Room No.', 'Vehicle No.', 'Booking Ref', 'Check In', 'Check Out'
+  ];
+  let csv = headers.join(',') + '\n';
+  filteredRecords.forEach(r => {
+    const row = [
+      r.regNo, capitalize(r.name), r.phone, capitalize(r.address), capitalize(r.city), r.pin,
+      r.adults, r.children, capitalize(r.comingFrom), capitalize(r.goingTo),
+      capitalize(r.plan), r.rooms, r.roomNo, r.vehicle, capitalize(r.bookingRef), r.checkin, r.checkout
+    ];
+    csv += row.map(val => `"${val}"`).join(',') + '\n';
+  });
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'hotel_records_filtered.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// Edit modal related code
+const modal = document.getElementById('editModal');
+const closeModalBtn = document.getElementById('closeModal');
+closeModalBtn.onclick = () => modal.style.display = 'none';
+window.onclick = event => {
+  if (event.target === modal) {
+    modal.style.display = 'none';
+  }
+};
+
+function openEditModal(regNo) {
+  const rec = records.find(r => r.regNo === regNo);
+  if (!rec) return alert("Record not found");
+  const form = document.getElementById('editForm');
+  form.regNo.value = rec.regNo;
+  form.name.value = rec.name;
+  form.phone.value = rec.phone;
+  form.address.value = rec.address;
+  form.city.value = rec.city;
+  form.pin.value = rec.pin;
+  form.adults.value = rec.adults;
+  form.children.value = rec.children;
+  form.comingFrom.value = rec.comingFrom;
+  form.goingTo.value = rec.goingTo;
+  form.plan.value = rec.plan;
+  form.rooms.value = rec.rooms;
+  form.roomNo.value = rec.roomNo;
+  form.vehicle.value = rec.vehicle;
+  form.bookingRef.value = rec.bookingRef;
+  form.checkin.value = rec.rawCheckIn;
+  form.checkout.value = rec.rawCheckOut;
+  modal.style.display = 'block';
+}
+
+// Edit form submission
+document.getElementById('editForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const form = e.target;
+  const regNo = form.regNo.value;
+  const index = records.findIndex(r => r.regNo === regNo);
+  if (index === -1) return alert("Record not found");
+
+  // update record
+  records[index] = {
+    regNo,
+    name: form.name.value.toLowerCase(),
+    phone: form.phone.value.toLowerCase(),
+    address: form.address.value.toLowerCase(),
+    city: form.city.value.toLowerCase(),
+    pin: form.pin.value.toLowerCase(),
+    adults: parseInt(form.adults.value),
+    children: parseInt(form.children.value),
+    comingFrom: form.comingFrom.value.toLowerCase(),
+    goingTo: form.goingTo.value.toLowerCase(),
+    plan: form.plan.value.toLowerCase(),
+    rooms: parseInt(form.rooms.value),
+    roomNo: form.roomNo.value.toLowerCase(),
+    vehicle: form.vehicle.value.toLowerCase(),
+    bookingRef: form.bookingRef.value.toLowerCase(),
+    checkin: formatDate(form.checkin.value),
+    checkout: formatDate(form.checkout.value),
+    rawCheckIn: form.checkin.value,
+    rawCheckOut: form.checkout.value
+  };
+
+  localStorage.setItem('records', JSON.stringify(records));
+  modal.style.display = 'none';
+  filterRecords();
+});
+
+// Auto-refresh every 10 minutes to update in house removal and records
+setInterval(() => {
+  records = JSON.parse(localStorage.getItem('records')) || [];
+  filterRecords();
+}, 600000);
+
+filterRecords();
+showSection('checkIn');
+</script>
+</body>
+</html>
