@@ -173,6 +173,10 @@
   <h2>View Records</h2>
   <input type="text" id="searchBar" placeholder="Search all records..." oninput="filterRecords()" />
   <button onclick="exportFilteredCsv()" style="margin-top: 10px;">Export Filtered as CSV</button>
+  <!-- New: Backup & Restore buttons (no visual design change, just simple buttons) -->
+  <button onclick="backupAllRecords()" style="margin-top: 10px; margin-left: 10px;">Backup All (Excel)</button>
+  <button onclick="document.getElementById('restoreFileInput').click()" style="margin-top: 10px; margin-left: 10px;">Restore Backup</button>
+  <input type="file" id="restoreFileInput" accept=".csv" style="display:none" onchange="handleRestoreFile(event)" />
   <table id="recordsTable">
     <tr>
       <th>Reg. No.</th><th>Name</th><th>Phone</th><th>Address</th><th>City</th><th>Pin</th><th>Adults</th><th>Children</th><th>Coming From</th><th>Going To</th><th>Plan</th><th>Rooms</th><th>Room No.</th><th>Vehicle No.</th><th>Booking Ref</th><th>Check In</th><th>Check Out</th><th>Actions</th>
@@ -229,7 +233,41 @@ let regCounter = Number(localStorage.getItem('regCounter')) || 1;
 
 function formatDate(dateStr) {
   const d = new Date(dateStr);
+  if (isNaN(d)) return '';
   return `${d.getDate().toString().padStart(2,'0')}-${(d.getMonth()+1).toString().padStart(2,'0')}-${d.getFullYear()}`;
+}
+
+// Check-in date WITH time (dd-mm-yyyy hh:mm)
+function formatCheckinDate(dateStr, timeDateObj) {
+  const d = new Date(dateStr);
+  if (isNaN(d)) return '';
+  const t = timeDateObj || new Date();
+  d.setHours(t.getHours(), t.getMinutes(), 0, 0);
+  const dd = d.getDate().toString().padStart(2,'0');
+  const mm = (d.getMonth()+1).toString().padStart(2,'0');
+  const yyyy = d.getFullYear();
+  const hh = d.getHours().toString().padStart(2,'0');
+  const min = d.getMinutes().toString().padStart(2,'0');
+  return `${dd}-${mm}-${yyyy} ${hh}:${min}`;
+}
+
+// For editing: keep same time, change date
+function formatCheckinDateFromTimeStr(dateStr, timeStr) {
+  const d = new Date(dateStr);
+  if (isNaN(d)) return '';
+  let hh = 12, min = 0;
+  if (timeStr) {
+    const parts = timeStr.split(':');
+    hh = parseInt(parts[0]) || 0;
+    min = parseInt(parts[1]) || 0;
+  }
+  d.setHours(hh, min, 0, 0);
+  const dd = d.getDate().toString().padStart(2,'0');
+  const mm = (d.getMonth()+1).toString().padStart(2,'0');
+  const yyyy = d.getFullYear();
+  const hhs = d.getHours().toString().padStart(2,'0');
+  const mins = d.getMinutes().toString().padStart(2,'0');
+  return `${dd}-${mm}-${yyyy} ${hhs}:${mins}`;
 }
 
 function showSection(id) {
@@ -244,6 +282,8 @@ function showSection(id) {
 document.getElementById('checkInForm').addEventListener('submit', e => {
   e.preventDefault();
   const f = e.target;
+  const now = new Date();
+
   const data = {
     regNo: 'HP' + String(regCounter).padStart(3, '0'),
     name: f.name.value.toLowerCase(),
@@ -260,7 +300,8 @@ document.getElementById('checkInForm').addEventListener('submit', e => {
     roomNo: f.roomNo.value.toLowerCase(),
     vehicle: f.vehicle.value.toLowerCase(),
     bookingRef: f.bookingRef.value.toLowerCase(),
-    checkin: formatDate(f.checkin.value),
+    // Check-in with time
+    checkin: formatCheckinDate(f.checkin.value, now),
     checkout: formatDate(f.checkout.value),
     rawCheckIn: f.checkin.value,
     rawCheckOut: f.checkout.value,
@@ -282,8 +323,8 @@ function getCurrentGuests() {
   return records.filter(r => new Date(r.rawCheckOut) >= todayMidday);
 }
 
-// Update both tables (In House & View Records)
 let filteredRecords = [];
+
 function updateTables() {
   const inHouse = document.getElementById('inHouseTable');
   const recordsTable = document.getElementById('recordsTable');
@@ -294,19 +335,24 @@ function updateTables() {
     <th>Adults</th><th>Children</th><th>Coming From</th><th>Going To</th><th>Plan</th><th>Rooms</th>
     <th>Room No.</th><th>Vehicle No.</th><th>Booking Ref</th><th>Check In</th><th>Check Out</th><th>Actions</th></tr>`;
 
-  getCurrentGuests().forEach(r => {
-    let row = inHouse.insertRow();
-    row.insertCell(0).textContent = r.regNo;
-    row.insertCell(1).textContent = capitalize(r.name);
-    row.insertCell(2).textContent = r.phone;
-    row.insertCell(3).textContent = r.roomNo;
-    row.insertCell(4).textContent = r.checkin;
-    row.insertCell(5).textContent = r.checkout;
-    row.insertCell(6).textContent = capitalize(r.plan);
-    row.insertCell(7).textContent = capitalize(r.bookingRef);
-    row.insertCell(8).textContent = r.adults + r.children;
-  });
+  // NEW: show latest guests first in In House
+  getCurrentGuests()
+    .slice()
+    .sort((a, b) => b.regNo.localeCompare(a.regNo))
+    .forEach(r => {
+      let row = inHouse.insertRow();
+      row.insertCell(0).textContent = r.regNo;
+      row.insertCell(1).textContent = capitalize(r.name);
+      row.insertCell(2).textContent = r.phone;
+      row.insertCell(3).textContent = r.roomNo;
+      row.insertCell(4).textContent = r.checkin;
+      row.insertCell(5).textContent = r.checkout;
+      row.insertCell(6).textContent = capitalize(r.plan);
+      row.insertCell(7).textContent = capitalize(r.bookingRef);
+      row.insertCell(8).textContent = r.adults + r.children;
+    });
 
+  // Records table: already sorted in filterRecords()
   filteredRecords.forEach(r => {
     let row = recordsTable.insertRow();
     row.insertCell(0).textContent = r.regNo;
@@ -334,7 +380,7 @@ function updateTables() {
       let pw = prompt('Enter password to delete:');
       if (pw === PASSWORD) {
         deleteRecord(r.regNo);
-      } else {
+      } else if (pw !== null) {
         alert('Incorrect password');
       }
     };
@@ -345,7 +391,7 @@ function updateTables() {
       let pw = prompt('Enter password to edit record:');
       if (pw === PASSWORD) {
         openEditModal(r.regNo);
-      } else {
+      } else if (pw !== null) {
         alert('Incorrect password');
       }
     };
@@ -365,6 +411,8 @@ function filterRecords() {
   filteredRecords = records.filter(r =>
     Object.values(r).some(val => val && val.toString().toLowerCase().includes(query))
   );
+  // NEW: latest entries first in records
+  filteredRecords.sort((a, b) => b.regNo.localeCompare(a.regNo));
   updateTables();
 }
 
@@ -403,6 +451,143 @@ function exportFilteredCsv() {
   a.download = 'hotel_records_filtered.csv';
   a.click();
   URL.revokeObjectURL(url);
+}
+
+// --- BACKUP ALL (for Excel) ---
+function backupAllRecords() {
+  if (records.length === 0) {
+    alert('No records to backup');
+    return;
+  }
+  const headers = [
+    'Reg. No.', 'Name', 'Phone', 'Address', 'City', 'Pin',
+    'Adults', 'Children', 'Coming From', 'Going To',
+    'Plan', 'Rooms', 'Room No.', 'Vehicle No.', 'Booking Ref', 'Check In', 'Check Out'
+  ];
+  let csv = headers.join(',') + '\n';
+  records.forEach(r => {
+    const row = [
+      r.regNo, capitalize(r.name), r.phone, capitalize(r.address), capitalize(r.city), r.pin,
+      r.adults, r.children, capitalize(r.comingFrom), capitalize(r.goingTo),
+      capitalize(r.plan), r.rooms, r.roomNo, r.vehicle, capitalize(r.bookingRef), r.checkin, r.checkout
+    ];
+    csv += row.map(val => `"${val}"`).join(',') + '\n';
+  });
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'hotel_pachmarhi_backup.csv'; // Opens in Excel
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// CSV parser (handles quotes)
+function parseCsv(text) {
+  const rows = [];
+  let field = '';
+  let row = [];
+  let inQuotes = false;
+
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (c === '"') {
+      if (inQuotes && text[i+1] === '"') {
+        field += '"';
+        i++;
+      } else {
+        inQuotes = !inQuotes;
+      }
+    } else if (c === ',' && !inQuotes) {
+      row.push(field);
+      field = '';
+    } else if ((c === '\n' || c === '\r') && !inQuotes) {
+      if (field !== '' || row.length) {
+        row.push(field);
+        rows.push(row);
+        row = [];
+        field = '';
+      }
+      if (c === '\r' && text[i+1] === '\n') i++;
+    } else {
+      field += c;
+    }
+  }
+  if (field !== '' || row.length) {
+    row.push(field);
+    rows.push(row);
+  }
+  return rows;
+}
+
+// Convert "dd-mm-yyyy" or "dd-mm-yyyy hh:mm" -> "yyyy-mm-dd"
+function convertDisplayDateToRaw(str) {
+  if (!str) return '';
+  const datePart = str.split(' ')[0];
+  const parts = datePart.split('-');
+  if (parts.length !== 3) return '';
+  const [dd, mm, yyyy] = parts;
+  return `${yyyy}-${mm.padStart(2,'0')}-${dd.padStart(2,'0')}`;
+}
+
+// Compute regCounter from existing records
+function getNextRegCounter(recordsArr) {
+  let maxNum = 0;
+  recordsArr.forEach(r => {
+    const num = parseInt((r.regNo || '').replace(/^\D+/, ''), 10);
+    if (!isNaN(num) && num > maxNum) maxNum = num;
+  });
+  return maxNum + 1;
+}
+
+// RESTORE BACKUP
+function handleRestoreFile(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const text = e.target.result;
+    const rows = parseCsv(text);
+    if (!rows || rows.length < 2) {
+      alert('No data found in backup file');
+      return;
+    }
+    const restored = [];
+    for (let i = 1; i < rows.length; i++) {
+      const cols = rows[i];
+      if (!cols || cols.length < 17 || !cols[0]) continue;
+      const rec = {
+        regNo: (cols[0] || '').trim(),
+        name: (cols[1] || '').trim().toLowerCase(),
+        phone: (cols[2] || '').trim(),
+        address: (cols[3] || '').trim().toLowerCase(),
+        city: (cols[4] || '').trim().toLowerCase(),
+        pin: (cols[5] || '').trim(),
+        adults: parseInt(cols[6]) || 0,
+        children: parseInt(cols[7]) || 0,
+        comingFrom: (cols[8] || '').trim().toLowerCase(),
+        goingTo: (cols[9] || '').trim().toLowerCase(),
+        plan: (cols[10] || '').trim().toLowerCase(),
+        rooms: parseInt(cols[11]) || 0,
+        roomNo: (cols[12] || '').trim().toLowerCase(),
+        vehicle: (cols[13] || '').trim().toLowerCase(),
+        bookingRef: (cols[14] || '').trim().toLowerCase(),
+        checkin: (cols[15] || '').trim(),
+        checkout: (cols[16] || '').trim()
+      };
+      rec.rawCheckIn = convertDisplayDateToRaw(rec.checkin);
+      rec.rawCheckOut = convertDisplayDateToRaw(rec.checkout);
+      restored.push(rec);
+    }
+    records = restored;
+    localStorage.setItem('records', JSON.stringify(records));
+    regCounter = getNextRegCounter(records);
+    localStorage.setItem('regCounter', regCounter);
+    filterRecords();
+    alert('Backup restored successfully!');
+    event.target.value = ''; // clear selected file
+  };
+  reader.readAsText(file);
 }
 
 // Edit modal related code
@@ -447,7 +632,9 @@ document.getElementById('editForm').addEventListener('submit', e => {
   const index = records.findIndex(r => r.regNo === regNo);
   if (index === -1) return alert("Record not found");
 
-  // update record
+  const old = records[index];
+  const oldTimePart = (old.checkin && old.checkin.split(' ')[1]) ? old.checkin.split(' ')[1] : null;
+
   records[index] = {
     regNo,
     name: form.name.value.toLowerCase(),
@@ -464,7 +651,7 @@ document.getElementById('editForm').addEventListener('submit', e => {
     roomNo: form.roomNo.value.toLowerCase(),
     vehicle: form.vehicle.value.toLowerCase(),
     bookingRef: form.bookingRef.value.toLowerCase(),
-    checkin: formatDate(form.checkin.value),
+    checkin: formatCheckinDateFromTimeStr(form.checkin.value, oldTimePart),
     checkout: formatDate(form.checkout.value),
     rawCheckIn: form.checkin.value,
     rawCheckOut: form.checkout.value
