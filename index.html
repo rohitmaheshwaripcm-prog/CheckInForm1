@@ -227,9 +227,45 @@
 
 <script>
 const PASSWORD = "0105";
+const REG_PREFIX = "HP";
+const REG_PAD = 4;
+
+function formatRegNo(n) {
+  return REG_PREFIX + String(n).padStart(REG_PAD, '0');
+}
+function parseRegNo(s) {
+  const n = parseInt(String(s || '').replace(/^\D+/, ''), 10);
+  return isNaN(n) ? 0 : n;
+}
 
 let records = JSON.parse(localStorage.getItem('records')) || [];
 let regCounter = Number(localStorage.getItem('regCounter')) || 1;
+
+// --- Migration: convert old HP001 / HP999 format to HP0001 ---
+let migrated = false;
+records.forEach(r => {
+  const num = parseRegNo(r.regNo);
+  const correct = formatRegNo(num);
+  if (r.regNo !== correct) {
+    r.regNo = correct;
+    migrated = true;
+  }
+});
+if (migrated) {
+  localStorage.setItem('records', JSON.stringify(records));
+}
+
+// Ensure counter is always ahead of max existing
+function getNextRegCounter(recordsArr) {
+  let maxNum = 0;
+  recordsArr.forEach(r => {
+    const num = parseRegNo(r.regNo);
+    if (num > maxNum) maxNum = num;
+  });
+  return maxNum + 1;
+}
+regCounter = Math.max(regCounter, getNextRegCounter(records));
+localStorage.setItem('regCounter', regCounter);
 
 function formatDate(dateStr) {
   const d = new Date(dateStr);
@@ -284,8 +320,11 @@ document.getElementById('checkInForm').addEventListener('submit', e => {
   const f = e.target;
   const now = new Date();
 
+  // Always ensure counter is ahead - fixes stuck HP999 issue
+  regCounter = Math.max(regCounter, getNextRegCounter(records));
+
   const data = {
-    regNo: 'HP' + String(regCounter).padStart(3, '0'),
+    regNo: formatRegNo(regCounter),
     name: f.name.value.toLowerCase(),
     phone: f.phone.value.toLowerCase(),
     address: f.address.value.toLowerCase(),
@@ -338,7 +377,7 @@ function updateTables() {
   // NEW: show latest guests first in In House
   getCurrentGuests()
     .slice()
-    .sort((a, b) => b.regNo.localeCompare(a.regNo))
+    .sort((a, b) => parseRegNo(b.regNo) - parseRegNo(a.regNo))
     .forEach(r => {
       let row = inHouse.insertRow();
       row.insertCell(0).textContent = r.regNo;
@@ -412,7 +451,7 @@ function filterRecords() {
     Object.values(r).some(val => val && val.toString().toLowerCase().includes(query))
   );
   // NEW: latest entries first in records
-  filteredRecords.sort((a, b) => b.regNo.localeCompare(a.regNo));
+  filteredRecords.sort((a, b) => parseRegNo(b.regNo) - parseRegNo(a.regNo));
   updateTables();
 }
 
@@ -530,15 +569,7 @@ function convertDisplayDateToRaw(str) {
   return `${yyyy}-${mm.padStart(2,'0')}-${dd.padStart(2,'0')}`;
 }
 
-// Compute regCounter from existing records
-function getNextRegCounter(recordsArr) {
-  let maxNum = 0;
-  recordsArr.forEach(r => {
-    const num = parseInt((r.regNo || '').replace(/^\D+/, ''), 10);
-    if (!isNaN(num) && num > maxNum) maxNum = num;
-  });
-  return maxNum + 1;
-}
+// getNextRegCounter is defined at startup
 
 // RESTORE BACKUP
 function handleRestoreFile(event) {
