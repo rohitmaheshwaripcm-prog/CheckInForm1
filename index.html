@@ -2,705 +2,1342 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Hotel Check-In Application</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Hotel Check-In</title>
+<link rel="manifest" id="manifest-link">
+<meta name="theme-color" content="#003366">
 <style>
-  body {
-    font-family: Arial, sans-serif;
-    background: #f7f7f7;
-    margin: 0; padding: 0;
-  }
-  header {
-    background: #003366;
-    color: white;
-    text-align: center;
-    padding: 10px;
-  }
-  nav {
-    background: #0059b3;
-    display: flex;
-    flex-wrap: wrap;
-  }
-  nav button {
-    background: none;
-    border: none;
-    color: white;
-    padding: 12px 15px;
-    cursor: pointer;
-    font-size: 16px;
-    flex: 1;
-  }
-  nav button:hover {
-    background-color: #0073e6;
-  }
-  section {
-    padding: 20px;
-  }
-  form input, form select {
-    display: block;
-    margin: 10px 0;
-    padding: 8px;
-    width: calc(100% - 20px);
-    max-width: 400px;
-  }
-  .submit-btn {
-    background-color: #0059b3;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    margin-top: 10px;
-    cursor: pointer;
-  }
-  .submit-btn:hover {
-    background-color: #003366;
-  }
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 10px;
-  }
-  table, th, td {
-    border: 1px solid #ddd;
-  }
-  th, td {
-    padding: 10px;
-    text-align: left;
-  }
-  th {
-    background-color: #003366;
-    color: white;
-  }
-  .hidden {
-    display: none;
-  }
-  #searchBar {
-    margin: 10px 0;
-    padding: 8px;
-    width: 300px;
-    max-width: 100%;
-  }
-  /* Modal styles */
-  .modal {
-    display: none; 
-    position: fixed; 
-    z-index: 1000; 
-    padding-top: 60px; 
-    left: 0; top: 0; width: 100%; height: 100%; 
-    overflow: auto; 
-    background-color: rgba(0,0,0,0.5);
-  }
-  .modal-content {
-    background-color: #fefefe;
-    margin: auto; padding: 20px;
-    border: 1px solid #888;
-    width: 90%;
-    max-width: 600px;
-  }
-  .close-btn {
-    color: #aaa;
-    float: right;
-    font-size: 28px;
-    font-weight: bold;
-    cursor: pointer;
-  }
-  .close-btn:hover {
-    color: #000;
-  }
+:root{--blue:#0059b3;--blue2:#003366;--bg:#f4f6f8;--card:#fff;--radius:14px}
+*{box-sizing:border-box}
+body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);margin:0;color:#1b1b1b;-webkit-font-smoothing:antialiased}
+header{background:var(--blue2);color:#fff;padding:14px 16px;text-align:center;position:sticky;top:0;z-index:20}
+header h1{margin:0;font-size:18px}
+header small{opacity:.85;font-size:12px}
+nav{background:var(--blue);display:flex;position:sticky;top:56px;z-index:20;overflow-x:auto}
+nav button{flex:1 0 auto;background:none;border:none;color:#fff;padding:14px 14px;font-size:15px;white-space:nowrap}
+nav button.active{background:#0073e6;font-weight:600}
+section{padding:14px;max-width:720px;margin:0 auto;display:none}
+section.active{display:block}
+.card{background:var(--card);padding:16px;border-radius:var(--radius);box-shadow:0 2px 10px rgba(0,0,0,.06);margin-bottom:14px}
+h2{margin:4px 0 12px;font-size:20px}
+h3{margin:16px 0 6px;font-size:16px}
+label{display:block;font-size:13px;font-weight:600;color:#444;margin:10px 0 4px}
+input, select{width:100%;padding:13px 12px;font-size:16px;border:1px solid #ccd2d8;border-radius:10px;background:#fff}
+input:focus,select:focus{outline:2px solid #9cc8ff;border-color:#9cc8ff}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:560px){.grid{grid-template-columns:1fr}}
+.btn{background:var(--blue);color:#fff;border:none;padding:13px 16px;border-radius:10px;font-size:16px;cursor:pointer;width:100%;margin-top:10px}
+.btn-secondary{background:#6b7280}
+.btn-danger{background:#c0392b}
+.btn-small{padding:9px 12px;font-size:14px;width:auto}
+.btn-row{display:flex;gap:8px;flex-wrap:wrap}
+.btn-row .btn{flex:1;min-width:120px}
+.muted{color:#667085;font-size:13px}
+.table-wrap{overflow-x:auto;background:#fff;border-radius:12px}
+table{width:100%;border-collapse:collapse;font-size:14px;min-width:620px}
+th,td{padding:10px 8px;border-bottom:1px solid #eee;text-align:left}
+th{background:#f8fafc;font-weight:700}
+.guest-card{border:1px solid #e5e7eb;border-radius:12px;padding:12px;margin-bottom:10px;background:#fff}
+.guest-card b{font-size:16px}
+#sigPad{border:1.5px dashed #9aa3af;border-radius:10px;background:#fff;width:100%;height:160px;touch-action:none}
+.id-grid{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.id-thumb-wrap{position:relative}
+.id-thumb-wrap img{width:110px;height:80px;object-fit:cover;border-radius:8px;border:1px solid #d1d5db}
+.id-thumb-wrap button{position:absolute;top:-6px;right:-6px;background:#c0392b;color:#fff;border:none;border-radius:50%;width:24px;height:24px;font-size:14px;cursor:pointer}
+.pill{display:inline-block;background:#eef5ff;color:#1d4ed8;padding:3px 8px;border-radius:20px;font-size:12px}
+.actions{display:flex;gap:6px;flex-wrap:wrap}
+
+/* Print Registration Card - 1 page A4 */
+@media print {
+  body * { visibility: hidden; }
+  #printModal, #printModal * { visibility: visible; }
+  #printModal { position: absolute !important; left:0; top:0; width:100%; height:auto; background:#fff !important; padding:0 !important; overflow:visible !important; display:block !important; }
+  #printCardArea { margin:0; padding:0; }
+  .no-print, nav, header { display:none !important; }
+  @page { size: A4; margin: 12mm; }
+}
+.rc-print { max-width:700px; margin:auto; font-size:13px; color:#111; line-height:1.35; }
+.rc-print h2, .rc-print h3 { text-align:center; margin:4px 0; }
+.rc-print .rc-line { margin:3px 0; }
+.rc-print img.idp { height:75px; margin:3px; border:1px solid #ccc; max-width:140px; object-fit:contain; }
+.rc-print .sig-img { height:55px; border:1px solid #ccc; }
+
+/* Records full view */
+.rec-grid { display:grid; grid-template-columns: 1fr 1fr; gap:4px 16px; font-size:13px; }
+@media(max-width:560px){ .rec-grid{ grid-template-columns:1fr; } }
+.rec-field b { color:#374151; font-weight:600; }
+.rec-photos img { width:70px; height:50px; object-fit:cover; border-radius:6px; border:1px solid #ddd; margin-right:4px; }
+
 </style>
 </head>
 <body>
-
 <header>
-  <h1>Hotel Check-In Application</h1>
+  <h1 id="hotelNameHeader">Hotel Pachmarhi</h1>
+  <small>Guest Entry Register — v3.0</small>
 </header>
-
 <nav>
-  <button onclick="showSection('checkIn')">Check In Sheet</button>
-  <button onclick="showSection('inHouse')">In House Guests</button>
-  <button onclick="showSection('viewRecords')">View Records</button>
+  <button onclick="showTab('checkinTab')" id="btn-checkinTab" class="active">Check-In</button>
+  <button onclick="showTab('inhouseTab')" id="btn-inhouseTab">In House</button>
+  <button onclick="showTab('recordsTab')" id="btn-recordsTab">Records</button>
+  <button onclick="showTab('settingsTab')" id="btn-settingsTab">Settings</button>
 </nav>
 
-<section id="checkIn">
-  <h2>Check In Sheet</h2>
-  <form id="checkInForm">
-    <input type="text" name="name" placeholder="Name *" required />
-    <input type="tel" name="phone" pattern="[0-9]{10}" placeholder="Phone Number *" required />
-    <input type="text" name="address" placeholder="Address *" required />
-    <input type="text" name="city" placeholder="City *" required />
-    <input type="text" name="pin" placeholder="Pin Code *" required />
-    <label>Check-In Date *</label>
-    <input type="date" name="checkin" required />
-    <label>Check-Out Date *</label>
-    <input type="date" name="checkout" required />
-    <input type="number" name="adults" placeholder="Adults *" required />
-    <input type="number" name="children" placeholder="Children *" required />
-    <input type="text" name="comingFrom" placeholder="Coming From *" required />
-    <input type="text" name="goingTo" placeholder="Going To *" required />
-    <label>Plan *</label>
-    <select name="plan" required>
-      <option value="">Select Plan</option>
-      <option>EP (Room Only)</option>
-      <option>CP (Breakfast)</option>
-      <option>MAP (Breakfast & Lunch)</option>
-      <option>AP (All Meals)</option>
+<section id="checkinTab" class="active">
+<div class="card">
+  <h2>New Check-In <span class="pill" id="nextRegNo">HP0001</span></h2>
+  <form id="checkInForm" autocomplete="off">
+    <div id="dupGuestBox" style="display:none;background:#fff3cd;border:1px solid #ffe69c;padding:10px;border-radius:10px;margin-bottom:8px;font-size:14px"></div>
+    <label>Name</label>
+    <input type="text" name="name" required placeholder="Guest full name">
+    <div class="grid">
+      <div><label>Phone Number</label><input type="tel" name="phone" pattern="[0-9]{10}" maxlength="10" required placeholder="10-digit"></div>
+      <div><label>City</label><input type="text" name="city" required></div>
+    </div>
+    <label>Address</label>
+    <input type="text" name="address" required>
+    <div class="grid">
+      <div><label>Pin Code</label><input type="text" name="pin"></div>
+      <div><label>Vehicle No.</label><input type="text" name="vehicleNo" placeholder="Optional"></div>
+    </div>
+    <div class="grid">
+      <div><label>Check-in Date</label><input type="date" name="checkin" required></div>
+      <div><label>Check-out Date</label><input type="date" name="checkout" required></div>
+    </div>
+    <div class="grid">
+      <div><label>Adults</label><input type="number" name="adults" min="1" value="2" required></div>
+      <div><label>Children</label><input type="number" name="children" min="0" value="0"></div>
+    </div>
+    <div class="grid">
+      <div><label>Room No.</label><input type="text" name="roomNo" required></div>
+      <div><label>Rooms</label><input type="number" name="rooms" min="1" value="1" required></div>
+    </div>
+    <div class="grid">
+      <div><label>Plan</label>
+        <select name="plan"><option>EP</option><option>CP</option><option>MAP</option><option>AP</option></select>
+      </div>
+      <div><label>Booking Ref</label>
+        <select name="bookingRef"><option>Walk In</option><option>OTA</option><option>Reservations</option><option>State Bank of India</option><option>Bank of India</option></select>
+      </div>
+    </div>
+    <label>Booking ID / Remarks</label>
+    <input type="text" name="bookingId" placeholder="OTA ID, coming from / going to">
+    <div class="grid">
+      <div><label>Coming From</label><input type="text" name="comingFrom"></div>
+      <div><label>Going To</label><input type="text" name="goingTo"></div>
+    </div>
+
+    <h3>ID Proof — multiple photos</h3>
+    <label>ID Type</label>
+    <select name="idType">
+      <option>Aadhaar</option><option>Passport</option><option>Driving Licence</option><option>Voter ID</option><option>Other</option>
     </select>
-    <input type="number" name="rooms" placeholder="Rooms *" required />
-    <input type="text" name="roomNo" placeholder="Room Number *" required />
-    <input type="text" name="vehicle" placeholder="Vehicle Number" />
-    <label>Booking Reference *</label>
-    <select name="bookingRef" required>
-      <option value="">Select Reference</option>
-      <option>OTA</option>
-      <option>Walk In</option>
-      <option>Reservations</option>
-      <option>State Bank of India</option>
-      <option>Bank of India</option>
-    </select>
-    <button type="submit" class="submit-btn">Check In</button>
+    <label style="font-weight:400">ID Photos — tap to add front/back</label>
+    <input type="file" id="idPhotoInput" accept="image/*" capture="environment" multiple>
+    <div id="idPhotoPreviewGrid" class="id-grid"></div>
+    <p class="muted">Photos are saved with the guest name. You can add as many as needed.</p>
+
+    <h3>Guest Signature</h3>
+    <canvas id="sigPad" width="600" height="180"></canvas>
+    <div class="btn-row">
+      <button type="button" class="btn btn-secondary" onclick="clearSignature()">Clear Signature</button>
+    </div>
+
+    <button type="submit" class="btn" style="margin-top:16px">✓ Check-In Guest</button>
+    <button type="reset" class="btn btn-secondary" onclick="clearSignature(); clearIdPhotos()">Reset Form</button>
   </form>
-  <p id="msg"></p>
+</div>
 </section>
 
-<section id="inHouse" class="hidden">
-  <h2>In House Guests</h2>
-  <p>Guests are automatically removed after 12:00 noon on their checkout date.</p>
-  <table id="inHouseTable">
-    <tr><th>Reg. No.</th><th>Name</th><th>Phone</th><th>Room No.</th><th>Check In</th><th>Check Out</th><th>Plan</th><th>Booking Ref</th><th>No of Persons</th></tr>
-  </table>
+<section id="inhouseTab">
+  <div class="card">
+    <h2>In House Guests</h2>
+    <p class="muted">Auto checkout at 12:00 noon.</p>
+    <div id="inhouseList"></div>
+    <button class="btn btn-secondary" onclick="shareInHouse()">Share Manager View / QR</button>
+  </div>
 </section>
 
-<section id="viewRecords" class="hidden">
-  <h2>View Records</h2>
-  <input type="text" id="searchBar" placeholder="Search all records..." oninput="filterRecords()" />
-  <button onclick="exportFilteredCsv()" style="margin-top: 10px;">Export Filtered as CSV</button>
-  <!-- New: Backup & Restore buttons (no visual design change, just simple buttons) -->
-  <button onclick="backupAllRecords()" style="margin-top: 10px; margin-left: 10px;">Backup All (Excel)</button>
-  <button onclick="document.getElementById('restoreFileInput').click()" style="margin-top: 10px; margin-left: 10px;">Restore Backup</button>
-  <input type="file" id="restoreFileInput" accept=".csv" style="display:none" onchange="handleRestoreFile(event)" />
-  <table id="recordsTable">
-    <tr>
-      <th>Reg. No.</th><th>Name</th><th>Phone</th><th>Address</th><th>City</th><th>Pin</th><th>Adults</th><th>Children</th><th>Coming From</th><th>Going To</th><th>Plan</th><th>Rooms</th><th>Room No.</th><th>Vehicle No.</th><th>Booking Ref</th><th>Check In</th><th>Check Out</th><th>Actions</th>
-    </tr>
-  </table>
+<section id="recordsTab">
+  <div class="card">
+    <h2>WhatsApp Day Report</h2>
+    <div class="grid">
+      <div><label>Report Date</label><input type="date" id="waDate"></div>
+      <div><label>Send to WhatsApp Number (optional)</label><input type="tel" id="waNumber" placeholder="91xxxxxxxxxx"></div>
+    </div>
+    <p class="muted" id="waCount">0 check-ins on selected date</p>
+    <div class="btn-row">
+      <button class="btn btn-small" onclick="dayReportXLSX()">Day XLSX</button>
+      <button class="btn btn-small" onclick="dayReportPDF()">Day PDF</button>
+      <button class="btn" style="background:#25D366;color:#fff" onclick="shareDayWhatsApp()">📱 Share on WhatsApp</button>
+    </div>
+    <p class="muted">Generates check-ins for the selected date. On Android it will attach the XLSX directly to WhatsApp. On iPhone/desktop it downloads the file and opens WhatsApp with a pre-filled message — you attach the file in 1 tap.</p>
+  </div>
+  <div class="card">
+    <h2>Records</h2>
+    <input type="text" id="searchInput" placeholder="Search name, phone, room…" oninput="filterRecords()" style="margin-bottom:8px">
+    <div class="btn-row">
+      <button class="btn btn-small" onclick="exportXLSX(false)">Export Filtered .xlsx</button>
+      <button class="btn btn-small" onclick="exportXLSX(true)">Backup All .xlsx</button>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-secondary btn-small" onclick="exportFullJSON()">Full Backup (.json + photos)</button>
+      <label class="btn btn-secondary btn-small" style="text-align:center">Restore / Merge Backup
+        <input type="file" id="restoreInput" accept=".xlsx,.csv,.json" hidden onchange="restoreBackup(this)">
+      </label>
+    </div>
+    <p class="muted">XLSX backup = text fields only (fast, small). JSON Full Backup = everything including ID photos + signatures.<br>Restore supports .json / .xlsx / .csv, old v1 files too. Merge mode updates existing Reg Nos with backup data.</p>
+    <div id="recordsList" style="margin-top:10px"></div>
+  </div>
 </section>
+
+<section id="settingsTab">
+  <div class="card">
+    <h2>Settings</h2>
+    <label>Hotel Name</label><input type="text" id="set_hotelName" value="Hotel Pachmarhi">
+    <label>Hotel Address / Phone</label><input type="text" id="set_hotelAddress" value="Pachmarhi, MP">
+    <label>Edit/Delete Password</label><input type="text" id="set_password" value="0105">
+    <label>Registration Card Terms</label>
+    <input type="text" id="set_terms" value="1. Check-out time 12:00 Noon. 2. Visitors not allowed in rooms. 3. Management is not responsible for valuables. 4. ID proof mandatory.">
+    <button class="btn" onclick="saveSettings()">Save Settings</button>
+    <hr>
+    <h3 style="color:#c0392b">Danger Zone</h3>
+    <button class="btn btn-danger" onclick="resetAllData()">Reset All Guest Entries</button>
+    <p class="muted">Deletes ALL guest records and photos from this browser. Password protected. Cannot be undone — export a backup first.</p>
+    <hr>
+    <h3>PWA Install</h3>
+    <p class="muted">Android Chrome: Menu → Install app. iPhone Safari: Share → Add to Home Screen. Runs full-screen offline.</p>
+    <button class="btn btn-secondary" id="installBtn" style="display:none">Install App</button>
+  </div>
+</section>
+
+<!-- Print Modal -->
+<div id="printModal" style="display:none;position:fixed;inset:0;background:#fff;z-index:99;overflow:auto;padding:16px">
+  <div style="text-align:right;margin-bottom:8px" class="no-print">
+    <button class="btn btn-small" onclick="window.print()">Print</button>
+    <button class="btn btn-small btn-secondary" onclick="downloadRegCardPDF()">Download PDF</button>
+    <button class="btn btn-secondary btn-small" onclick="closePrintModal()">Close</button>
+  </div>
+  <div id="printCardArea"></div>
+</div>
 
 <!-- Edit Modal -->
-<div id="editModal" class="modal">
-  <div class="modal-content">
-    <span class="close-btn" id="closeModal">&times;</span>
-    <h3>Edit Check-In Record</h3>
-    <form id="editForm">
-      <input type="hidden" name="regNo" />
-      <input type="text" name="name" placeholder="Name *" required />
-      <input type="tel" name="phone" pattern="[0-9]{10}" placeholder="Phone Number *" required />
-      <input type="text" name="address" placeholder="Address *" required />
-      <input type="text" name="city" placeholder="City *" required />
-      <input type="text" name="pin" placeholder="Pin Code *" required />
-      <input type="number" name="adults" placeholder="Adults *" required />
-      <input type="number" name="children" placeholder="Children *" required />
-      <input type="text" name="comingFrom" placeholder="Coming From *" required />
-      <input type="text" name="goingTo" placeholder="Going To *" required />
-      <select name="plan" required>
-        <option>EP (Room Only)</option>
-        <option>CP (Breakfast)</option>
-        <option>MAP (Breakfast & Lunch)</option>
-        <option>AP (All Meals)</option>
-      </select>
-      <input type="number" name="rooms" placeholder="Rooms *" required />
-      <input type="text" name="roomNo" placeholder="Room Number *" required />
-      <input type="text" name="vehicle" placeholder="Vehicle Number" />
-      <select name="bookingRef" required>
-        <option>OTA</option>
-        <option>Walk In</option>
-        <option>Reservations</option>
-        <option>State Bank of India</option>
-        <option>Bank of India</option>
-      </select>
-      <label>Check-In Date *</label>
-      <input type="date" name="checkin" required />
-      <label>Check-Out Date *</label>
-      <input type="date" name="checkout" required />
-      <button type="submit" class="submit-btn">Save Changes</button>
-    </form>
+<div id="editModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;overflow:auto;padding:14px">
+  <div class="card" style="max-width:720px;margin:20px auto">
+    <h2>Edit Guest Entry <span id="editRegNo" class="pill"></span></h2>
+    <div class="grid">
+      <div><label>Name</label><input type="text" id="edit_name"></div>
+      <div><label>Phone</label><input type="tel" id="edit_phone"></div>
+      <div><label>Address</label><input type="text" id="edit_address"></div>
+      <div><label>City</label><input type="text" id="edit_city"></div>
+      <div><label>Pin</label><input type="text" id="edit_pin"></div>
+      <div><label>Vehicle No.</label><input type="text" id="edit_vehicleNo"></div>
+      <div><label>Check-in</label><input type="date" id="edit_checkin"></div>
+      <div><label>Check-out</label><input type="date" id="edit_checkout"></div>
+      <div><label>Adults</label><input type="number" id="edit_adults" min="1"></div>
+      <div><label>Children</label><input type="number" id="edit_children" min="0"></div>
+      <div><label>Room No.</label><input type="text" id="edit_roomNo"></div>
+      <div><label>Rooms</label><input type="number" id="edit_rooms" min="1"></div>
+      <div><label>Plan</label><select id="edit_plan"><option>EP</option><option>CP</option><option>MAP</option><option>AP</option></select></div>
+      <div><label>Booking Ref</label><select id="edit_bookingRef"><option>Walk In</option><option>OTA</option><option>Reservations</option><option>State Bank of India</option><option>Bank of India</option></select></div>
+      <div><label>Booking ID / Remarks</label><input type="text" id="edit_bookingId"></div>
+      <div><label>Coming From</label><input type="text" id="edit_comingFrom"></div>
+      <div><label>Going To</label><input type="text" id="edit_goingTo"></div>
+      <div><label>ID Type</label><select id="edit_idType"><option>Aadhaar</option><option>Passport</option><option>Driving Licence</option><option>Voter ID</option><option>Other</option></select></div>
+    </div>
+    <h3>ID Photos</h3>
+    <input type="file" accept="image/*" multiple onchange="editAddPhotos(event)">
+    <div id="editPhotoGrid" class="id-grid"></div>
+    <h3>Signature</h3>
+    <canvas id="editSigPad" width="600" height="150" style="border:1.5px dashed #9aa3af;border-radius:10px;background:#fff;width:100%;touch-action:none"></canvas><br>
+    <button type="button" class="btn btn-secondary btn-small" onclick="clearEditSignature()">Clear Signature</button>
+    <div class="btn-row" style="margin-top:12px">
+      <button class="btn" onclick="saveEditRecord()">Save Changes</button>
+      <button class="btn btn-secondary" onclick="document.getElementById('editModal').style.display='none'">Cancel</button>
+    </div>
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+
 <script>
-const PASSWORD = "0105";
+// ===== Hotel Check-In v3.0 - Production Bug-Fix Release =====
+// Preserves UI from v2.6 exactly. All business logic hardened.
+
+// --- Utilities ---
 const REG_PREFIX = "HP";
-const REG_PAD = 4;
+function formatRegNo(n){ n = parseInt(n,10)||0; return REG_PREFIX + String(n).padStart(4,'0'); }
+function parseRegNo(s){ const n = parseInt(String(s||'').replace(/^\D+/,'') ,10); return isNaN(n)?0:n; }
+function safeName(s){ return String(s||'guest').replace(/[^a-zA-Z0-9_-]+/g,'_').slice(0,40); }
+function escapeHtml(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+function todayISO(){ const d=new Date(); return d.toISOString().slice(0,10); }
 
-function formatRegNo(n) {
-  return REG_PREFIX + String(n).padStart(REG_PAD, '0');
+// --- Settings (localStorage, mirrored to IDB) ---
+let SETTINGS = JSON.parse(localStorage.getItem('hotel_settings')||'{}');
+if(!SETTINGS.hotelName) SETTINGS = { hotelName: "Hotel Pachmarhi", hotelAddress: "Pachmarhi, MP", password: "0105", terms: "1. Check-out time 12:00 Noon. 2. Visitors not allowed in rooms. 3. Management is not responsible for valuables. 4. ID proof mandatory." };
+
+function verifyPassword(action='continue'){
+  const pwd = prompt(`Enter password to ${action}:`);
+  if(pwd !== (SETTINGS.password||'0105')){ alert('Wrong password'); return false; }
+  return true;
 }
-function parseRegNo(s) {
-  const n = parseInt(String(s || '').replace(/^\D+/, ''), 10);
-  return isNaN(n) ? 0 : n;
-}
-
-let records = JSON.parse(localStorage.getItem('records')) || [];
-let regCounter = Number(localStorage.getItem('regCounter')) || 1;
-
-// --- Migration: convert old HP001 / HP999 format to HP0001 ---
-let migrated = false;
-records.forEach(r => {
-  const num = parseRegNo(r.regNo);
-  const correct = formatRegNo(num);
-  if (r.regNo !== correct) {
-    r.regNo = correct;
-    migrated = true;
-  }
-});
-if (migrated) {
-  localStorage.setItem('records', JSON.stringify(records));
-}
-
-// Ensure counter is always ahead of max existing
-function getNextRegCounter(recordsArr) {
-  let maxNum = 0;
-  recordsArr.forEach(r => {
-    const num = parseRegNo(r.regNo);
-    if (num > maxNum) maxNum = num;
+// --- IndexedDB ---
+const DB_NAME = 'hotel_pachmarhi_v3';
+const DB_VERSION = 1;
+let db;
+function idbOpen(){
+  return new Promise((resolve, reject)=>{
+    const req = indexedDB.open(DB_NAME, DB_VERSION);
+    req.onupgradeneeded = e=>{
+      const d = e.target.result;
+      if(!d.objectStoreNames.contains('guests')){
+        const store = d.createObjectStore('guests', {keyPath:'regNo'});
+        store.createIndex('by_checkin', 'checkin', {unique:false});
+        store.createIndex('by_phone', 'phone', {unique:false});
+        store.createIndex('by_room', 'roomNo', {unique:false});
+      }
+      if(!d.objectStoreNames.contains('meta')){
+        d.createObjectStore('meta', {keyPath:'key'});
+      }
+    };
+    req.onsuccess = ()=>{ db = req.result; resolve(db); };
+    req.onerror = ()=> reject(req.error);
   });
-  return maxNum + 1;
 }
-regCounter = Math.max(regCounter, getNextRegCounter(records));
-localStorage.setItem('regCounter', regCounter);
-
-function formatDate(dateStr) {
-  const d = new Date(dateStr);
-  if (isNaN(d)) return '';
-  return `${d.getDate().toString().padStart(2,'0')}-${(d.getMonth()+1).toString().padStart(2,'0')}-${d.getFullYear()}`;
+function idbTx(store, mode='readonly'){ return db.transaction(store, mode).objectStore(store); }
+function idbGetAll(storeName){
+  return new Promise((res,rej)=>{ const r=idbTx(storeName).getAll(); r.onsuccess=()=>res(r.result||[]); r.onerror=()=>rej(r.error); });
 }
-
-// Check-in date WITH time (dd-mm-yyyy hh:mm)
-function formatCheckinDate(dateStr, timeDateObj) {
-  const d = new Date(dateStr);
-  if (isNaN(d)) return '';
-  const t = timeDateObj || new Date();
-  d.setHours(t.getHours(), t.getMinutes(), 0, 0);
-  const dd = d.getDate().toString().padStart(2,'0');
-  const mm = (d.getMonth()+1).toString().padStart(2,'0');
-  const yyyy = d.getFullYear();
-  const hh = d.getHours().toString().padStart(2,'0');
-  const min = d.getMinutes().toString().padStart(2,'0');
-  return `${dd}-${mm}-${yyyy} ${hh}:${min}`;
+function idbGet(storeName, key){
+  return new Promise((res,rej)=>{ const r=idbTx(storeName).get(key); r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error); });
+}
+function idbPut(storeName, val){
+  return new Promise((res,rej)=>{ const r=idbTx(storeName,'readwrite').put(val); r.onsuccess=()=>res(); r.onerror=()=>rej(r.error); });
+}
+function idbDelete(storeName, key){
+  return new Promise((res,rej)=>{ const r=idbTx(storeName,'readwrite').delete(key); r.onsuccess=()=>res(); r.onerror=()=>rej(r.error); });
+}
+function idbClear(storeName){
+  return new Promise((res,rej)=>{ const r=idbTx(storeName,'readwrite').clear(); r.onsuccess=()=>res(); r.onerror=()=>rej(r.error); });
+}
+function idbCount(storeName){
+  return new Promise((res,rej)=>{ const r=idbTx(storeName).count(); r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error); });
 }
 
-// For editing: keep same time, change date
-function formatCheckinDateFromTimeStr(dateStr, timeStr) {
-  const d = new Date(dateStr);
-  if (isNaN(d)) return '';
-  let hh = 12, min = 0;
-  if (timeStr) {
-    const parts = timeStr.split(':');
-    hh = parseInt(parts[0]) || 0;
-    min = parseInt(parts[1]) || 0;
-  }
-  d.setHours(hh, min, 0, 0);
-  const dd = d.getDate().toString().padStart(2,'0');
-  const mm = (d.getMonth()+1).toString().padStart(2,'0');
-  const yyyy = d.getFullYear();
-  const hhs = d.getHours().toString().padStart(2,'0');
-  const mins = d.getMinutes().toString().padStart(2,'0');
-  return `${dd}-${mm}-${yyyy} ${hhs}:${mins}`;
-}
-
-function showSection(id) {
-  document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
-  document.getElementById(id).classList.remove('hidden');
-  if(id === 'viewRecords') {
-    filterRecords(); // refresh table on view
-  }
-}
-
-// Check In form submission
-document.getElementById('checkInForm').addEventListener('submit', e => {
-  e.preventDefault();
-  const f = e.target;
+// Paginated / filtered fetch
+async function dbGetGuests({search='', offset=0, limit=100, inhouseOnly=false}={}){
+  const all = await idbGetAll('guests');
+  let list = all;
   const now = new Date();
-
-  // Always ensure counter is ahead - fixes stuck HP999 issue
-  regCounter = Math.max(regCounter, getNextRegCounter(records));
-
-  const data = {
-    regNo: formatRegNo(regCounter),
-    name: f.name.value.toLowerCase(),
-    phone: f.phone.value.toLowerCase(),
-    address: f.address.value.toLowerCase(),
-    city: f.city.value.toLowerCase(),
-    pin: f.pin.value.toLowerCase(),
-    adults: parseInt(f.adults.value),
-    children: parseInt(f.children.value),
-    comingFrom: f.comingFrom.value.toLowerCase(),
-    goingTo: f.goingTo.value.toLowerCase(),
-    plan: f.plan.value.toLowerCase(),
-    rooms: parseInt(f.rooms.value),
-    roomNo: f.roomNo.value.toLowerCase(),
-    vehicle: f.vehicle.value.toLowerCase(),
-    bookingRef: f.bookingRef.value.toLowerCase(),
-    // Check-in with time
-    checkin: formatCheckinDate(f.checkin.value, now),
-    checkout: formatDate(f.checkout.value),
-    rawCheckIn: f.checkin.value,
-    rawCheckOut: f.checkout.value,
-  };
-  records.push(data);
-  localStorage.setItem('records', JSON.stringify(records));
-  regCounter++;
-  localStorage.setItem('regCounter', regCounter);
-  filterRecords();
-  f.reset();
-  document.getElementById('msg').textContent = 'Guest Checked In Successfully!';
-  setTimeout(() => document.getElementById('msg').textContent = '', 2000);
-});
-
-// Get current guests for In House tab only
-function getCurrentGuests() {
-  const now = new Date();
-  const todayMidday = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12, 0, 0);
-  return records.filter(r => new Date(r.rawCheckOut) >= todayMidday);
-}
-
-let filteredRecords = [];
-
-function updateTables() {
-  const inHouse = document.getElementById('inHouseTable');
-  const recordsTable = document.getElementById('recordsTable');
-  inHouse.innerHTML = `<tr>
-    <th>Reg. No.</th><th>Name</th><th>Phone</th><th>Room No.</th><th>Check In</th><th>Check Out</th><th>Plan</th><th>Booking Ref</th><th>No of Persons</th></tr>`;
-  recordsTable.innerHTML = `<tr>
-    <th>Reg. No.</th><th>Name</th><th>Phone</th><th>Address</th><th>City</th><th>Pin</th>
-    <th>Adults</th><th>Children</th><th>Coming From</th><th>Going To</th><th>Plan</th><th>Rooms</th>
-    <th>Room No.</th><th>Vehicle No.</th><th>Booking Ref</th><th>Check In</th><th>Check Out</th><th>Actions</th></tr>`;
-
-  // NEW: show latest guests first in In House
-  getCurrentGuests()
-    .slice()
-    .sort((a, b) => parseRegNo(b.regNo) - parseRegNo(a.regNo))
-    .forEach(r => {
-      let row = inHouse.insertRow();
-      row.insertCell(0).textContent = r.regNo;
-      row.insertCell(1).textContent = capitalize(r.name);
-      row.insertCell(2).textContent = r.phone;
-      row.insertCell(3).textContent = r.roomNo;
-      row.insertCell(4).textContent = r.checkin;
-      row.insertCell(5).textContent = r.checkout;
-      row.insertCell(6).textContent = capitalize(r.plan);
-      row.insertCell(7).textContent = capitalize(r.bookingRef);
-      row.insertCell(8).textContent = r.adults + r.children;
+  if(inhouseOnly){
+    list = list.filter(r=>{
+      if(r.checkedOut) return false;
+      const out = new Date((r.checkout||'2099-12-31') + 'T12:00:00');
+      return out >= now;
     });
-
-  // Records table: already sorted in filterRecords()
-  filteredRecords.forEach(r => {
-    let row = recordsTable.insertRow();
-    row.insertCell(0).textContent = r.regNo;
-    row.insertCell(1).textContent = capitalize(r.name);
-    row.insertCell(2).textContent = r.phone;
-    row.insertCell(3).textContent = capitalize(r.address);
-    row.insertCell(4).textContent = capitalize(r.city);
-    row.insertCell(5).textContent = r.pin;
-    row.insertCell(6).textContent = r.adults;
-    row.insertCell(7).textContent = r.children;
-    row.insertCell(8).textContent = capitalize(r.comingFrom);
-    row.insertCell(9).textContent = capitalize(r.goingTo);
-    row.insertCell(10).textContent = capitalize(r.plan);
-    row.insertCell(11).textContent = r.rooms;
-    row.insertCell(12).textContent = r.roomNo;
-    row.insertCell(13).textContent = r.vehicle;
-    row.insertCell(14).textContent = capitalize(r.bookingRef);
-    row.insertCell(15).textContent = r.checkin;
-    row.insertCell(16).textContent = r.checkout;
-
-    let actionCell = row.insertCell(17);
-    let btnDelete = document.createElement('button');
-    btnDelete.textContent = 'Delete';
-    btnDelete.onclick = () => {
-      let pw = prompt('Enter password to delete:');
-      if (pw === PASSWORD) {
-        deleteRecord(r.regNo);
-      } else if (pw !== null) {
-        alert('Incorrect password');
-      }
-    };
-    let btnEdit = document.createElement('button');
-    btnEdit.textContent = 'Edit';
-    btnEdit.style.marginLeft = '10px';
-    btnEdit.onclick = () => {
-      let pw = prompt('Enter password to edit record:');
-      if (pw === PASSWORD) {
-        openEditModal(r.regNo);
-      } else if (pw !== null) {
-        alert('Incorrect password');
-      }
-    };
-    actionCell.appendChild(btnDelete);
-    actionCell.appendChild(btnEdit);
-  });
-}
-
-function capitalize(s) {
-  if (!s) return s;
-  return s.charAt(0).toUpperCase() + s.slice(1);
-}
-
-// Search filter
-function filterRecords() {
-  const query = document.getElementById('searchBar').value.toLowerCase();
-  filteredRecords = records.filter(r =>
-    Object.values(r).some(val => val && val.toString().toLowerCase().includes(query))
-  );
-  // NEW: latest entries first in records
-  filteredRecords.sort((a, b) => parseRegNo(b.regNo) - parseRegNo(a.regNo));
-  updateTables();
-}
-
-// Delete record function
-function deleteRecord(regNo) {
-  records = records.filter(r => r.regNo !== regNo);
-  filteredRecords = filteredRecords.filter(r => r.regNo !== regNo);
-  localStorage.setItem('records', JSON.stringify(records));
-  updateTables();
-}
-
-// Export filtered records as CSV
-function exportFilteredCsv() {
-  if (filteredRecords.length === 0) {
-    alert('No records to export');
-    return;
   }
-  const headers = [
-    'Reg. No.', 'Name', 'Phone', 'Address', 'City', 'Pin',
-    'Adults', 'Children', 'Coming From', 'Going To',
-    'Plan', 'Rooms', 'Room No.', 'Vehicle No.', 'Booking Ref', 'Check In', 'Check Out'
-  ];
-  let csv = headers.join(',') + '\n';
-  filteredRecords.forEach(r => {
-    const row = [
-      r.regNo, capitalize(r.name), r.phone, capitalize(r.address), capitalize(r.city), r.pin,
-      r.adults, r.children, capitalize(r.comingFrom), capitalize(r.goingTo),
-      capitalize(r.plan), r.rooms, r.roomNo, r.vehicle, capitalize(r.bookingRef), r.checkin, r.checkout
-    ];
-    csv += row.map(val => `"${val}"`).join(',') + '\n';
-  });
-  const blob = new Blob([csv], { type: 'text/csv' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'hotel_records_filtered.csv';
-  a.click();
-  URL.revokeObjectURL(url);
-}
-
-// --- BACKUP ALL (for Excel) ---
-function backupAllRecords() {
-  if (records.length === 0) {
-    alert('No records to backup');
-    return;
+  if(search){
+    const q = search.toLowerCase();
+    list = list.filter(r=>{
+      const hay = [
+        r.regNo||'', r.name||'', r.phone||'', r.roomNo||'', r.city||'', r.vehicleNo||''
+      ].join(' ').toLowerCase();
+      return hay.includes(q);
+    });
   }
-  const headers = [
-    'Reg. No.', 'Name', 'Phone', 'Address', 'City', 'Pin',
-    'Adults', 'Children', 'Coming From', 'Going To',
-    'Plan', 'Rooms', 'Room No.', 'Vehicle No.', 'Booking Ref', 'Check In', 'Check Out'
-  ];
-  let csv = headers.join(',') + '\n';
-  records.forEach(r => {
-    const row = [
-      r.regNo, capitalize(r.name), r.phone, capitalize(r.address), capitalize(r.city), r.pin,
-      r.adults, r.children, capitalize(r.comingFrom), capitalize(r.goingTo),
-      capitalize(r.plan), r.rooms, r.roomNo, r.vehicle, capitalize(r.bookingRef), r.checkin, r.checkout
-    ];
-    csv += row.map(val => `"${val}"`).join(',') + '\n';
-  });
-  const blob = new Blob([csv], { type: 'text/csv' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'hotel_pachmarhi_backup.csv'; // Opens in Excel
-  a.click();
-  URL.revokeObjectURL(url);
+  // sort desc by regNo numeric
+  list.sort((a,b)=> parseRegNo(b.regNo) - parseRegNo(a.regNo));
+  const total = list.length;
+  const page = list.slice(offset, offset+limit);
+  return {rows: page, total};
 }
 
-// CSV parser (handles quotes)
-function parseCsv(text) {
-  const rows = [];
-  let field = '';
-  let row = [];
-  let inQuotes = false;
+async function dbGetMaxReg(){
+  const all = await idbGetAll('guests');
+  let max=0;
+  all.forEach(r=>{ const n=parseRegNo(r.regNo); if(n>max) max=n; });
+  return max;
+}
 
-  for (let i = 0; i < text.length; i++) {
-    const c = text[i];
-    if (c === '"') {
-      if (inQuotes && text[i+1] === '"') {
-        field += '"';
-        i++;
-      } else {
-        inQuotes = !inQuotes;
-      }
-    } else if (c === ',' && !inQuotes) {
-      row.push(field);
-      field = '';
-    } else if ((c === '\n' || c === '\r') && !inQuotes) {
-      if (field !== '' || row.length) {
-        row.push(field);
-        rows.push(row);
-        row = [];
-        field = '';
-      }
-      if (c === '\r' && text[i+1] === '\n') i++;
-    } else {
-      field += c;
+// --- Migration from localStorage ---
+async function migrateFromLocalStorage(){
+  try{
+    const count = await idbCount('guests');
+    if(count>0) return; // already migrated
+    const raw = localStorage.getItem('records');
+    if(!raw) return;
+    const records = JSON.parse(raw);
+    if(!Array.isArray(records) || records.length===0) return;
+    let migrated=0;
+    for(const r of records){
+      // normalize
+      if(r.idPhoto &&!r.idPhotos) r.idPhotos = [r.idPhoto];
+      if(!r.idPhotos) r.idPhotos = [];
+      delete r.idNumber;
+      if(!r.regNo) continue;
+      r.regNo = formatRegNo(parseRegNo(r.regNo));
+      await idbPut('guests', r);
+      migrated++;
     }
-  }
-  if (field !== '' || row.length) {
-    row.push(field);
-    rows.push(row);
-  }
-  return rows;
+    console.log('Migrated', migrated, 'records from localStorage to IndexedDB');
+    // keep localStorage copy as backup, don't delete
+  }catch(e){ console.error('Migration failed', e); }
 }
 
-// Convert "dd-mm-yyyy" or "dd-mm-yyyy hh:mm" -> "yyyy-mm-dd"
-function convertDisplayDateToRaw(str) {
-  if (!str) return '';
-  const datePart = str.split(' ')[0];
-  const parts = datePart.split('-');
-  if (parts.length !== 3) return '';
-  const [dd, mm, yyyy] = parts;
-  return `${yyyy}-${mm.padStart(2,'0')}-${dd.padStart(2,'0')}`;
+// --- App State ---
+let currentPage = 0;
+const PAGE_SIZE = 50;
+let currentSearch = '';
+let regCounter = 1;
+
+async function refreshRegCounter(){
+  const max = await dbGetMaxReg();
+  regCounter = max + 1;
+  const el = document.getElementById('nextRegNo');
+  if(el) el.textContent = formatRegNo(regCounter);
 }
 
-// getNextRegCounter is defined at startup
+// --- Tabs ---
+function showTab(id){
+  document.querySelectorAll('section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.getElementById('btn-'+id)?.classList.add('active');
+  if(id==='inhouseTab') renderInHouse();
+  if(id==='recordsTab') { filterRecords(); setTimeout(updateWaCount, 50); }
+  if(id==='checkinTab') { restoreSignature(); }
+}
 
-// RESTORE BACKUP
-function handleRestoreFile(event) {
-  const file = event.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = e => {
-    const text = e.target.result;
-    const rows = parseCsv(text);
-    if (!rows || rows.length < 2) {
-      alert('No data found in backup file');
-      return;
-    }
-    const restored = [];
-    for (let i = 1; i < rows.length; i++) {
-      const cols = rows[i];
-      if (!cols || cols.length < 17 || !cols[0]) continue;
-      const rec = {
-        regNo: (cols[0] || '').trim(),
-        name: (cols[1] || '').trim().toLowerCase(),
-        phone: (cols[2] || '').trim(),
-        address: (cols[3] || '').trim().toLowerCase(),
-        city: (cols[4] || '').trim().toLowerCase(),
-        pin: (cols[5] || '').trim(),
-        adults: parseInt(cols[6]) || 0,
-        children: parseInt(cols[7]) || 0,
-        comingFrom: (cols[8] || '').trim().toLowerCase(),
-        goingTo: (cols[9] || '').trim().toLowerCase(),
-        plan: (cols[10] || '').trim().toLowerCase(),
-        rooms: parseInt(cols[11]) || 0,
-        roomNo: (cols[12] || '').trim().toLowerCase(),
-        vehicle: (cols[13] || '').trim().toLowerCase(),
-        bookingRef: (cols[14] || '').trim().toLowerCase(),
-        checkin: (cols[15] || '').trim(),
-        checkout: (cols[16] || '').trim()
+// --- Signature Pad (with resize preservation) ---
+let sigCanvas, sigCtx, hasSignature=false, drawing=false;
+let signatureData = ''; // preserved across resizes/tabs
+
+function initSignature(){
+  sigCanvas = document.getElementById('sigPad');
+  if(!sigCanvas) return;
+  sigCtx = sigCanvas.getContext('2d');
+  sigCtx.lineWidth=2; sigCtx.lineCap='round'; sigCtx.lineJoin='round';
+
+  function getPos(e){
+    const r=sigCanvas.getBoundingClientRect();
+    const t=e.touches?e.touches[0]:e;
+    return {x:t.clientX-r.left, y:t.clientY-r.top};
+  }
+  sigCanvas.addEventListener('mousedown', e=>{ drawing=true; const p=getPos(e); sigCtx.beginPath(); sigCtx.moveTo(p.x,p.y); e.preventDefault(); });
+  sigCanvas.addEventListener('mousemove', e=>{ if(!drawing) return; const p=getPos(e); sigCtx.lineTo(p.x,p.y); sigCtx.stroke(); hasSignature=true; });
+  window.addEventListener('mouseup', ()=>{ if(drawing){ drawing=false; saveSignatureData(); }});
+  sigCanvas.addEventListener('touchstart', e=>{ e.preventDefault(); drawing=true; const p=getPos(e); sigCtx.beginPath(); sigCtx.moveTo(p.x,p.y); }, {passive:false});
+  sigCanvas.addEventListener('touchmove', e=>{ e.preventDefault(); if(!drawing) return; const p=getPos(e); sigCtx.lineTo(p.x,p.y); sigCtx.stroke(); hasSignature=true; }, {passive:false});
+  sigCanvas.addEventListener('touchend', e=>{ e.preventDefault(); if(drawing){ drawing=false; saveSignatureData(); }});
+
+  resizeSignatureCanvas();
+  window.addEventListener('resize', ()=>{ setTimeout(resizeSignatureCanvas, 100); });
+}
+function saveSignatureData(){
+  if(sigCanvas) signatureData = hasSignature? sigCanvas.toDataURL('image/png') : '';
+}
+function restoreSignature(){
+  if(!sigCanvas ||!signatureData) return;
+  const img = new Image();
+  img.onload = ()=>{ sigCtx.clearRect(0,0,sigCanvas.width,sigCanvas.height); sigCtx.drawImage(img, 0,0, sigCanvas.width, sigCanvas.height); hasSignature=true; };
+  img.src = signatureData;
+}
+function resizeSignatureCanvas(){
+  if(!sigCanvas) return;
+  // save current
+  saveSignatureData();
+  const parent = sigCanvas.parentElement;
+  const w = parent? parent.clientWidth : 600;
+  const ratio = window.devicePixelRatio || 1;
+  sigCanvas.style.width = '100%';
+  sigCanvas.style.height = '160px';
+  const displayWidth = Math.min(w, 700);
+  sigCanvas.width = displayWidth * ratio;
+  sigCanvas.height = 160 * ratio;
+  sigCtx.setTransform(1,0,0,1,1);
+  sigCtx.scale(ratio, ratio);
+  sigCtx.lineWidth=2; sigCtx.lineCap='round'; sigCtx.lineJoin='round';
+  // restore
+  if(signatureData){
+    const img = new Image();
+    img.onload = ()=>{ sigCtx.drawImage(img, 0,0, displayWidth, 160); hasSignature=true; };
+    img.src = signatureData;
+  }
+}
+function clearSignature(){
+  if(!sigCtx) return;
+  sigCtx.clearRect(0,0,sigCanvas.width,sigCanvas.height);
+  hasSignature=false; signatureData='';
+}
+function getSignatureData(){
+  saveSignatureData();
+  return signatureData;
+}
+
+// --- ID Photos ---
+let idPhotos = [];
+function renderIdPhotos(){
+  const grid = document.getElementById('idPhotoPreviewGrid');
+  if(!grid) return;
+  grid.innerHTML = '';
+  idPhotos.forEach((src, i)=>{
+    const wrap = document.createElement('div');
+    wrap.className = 'id-thumb-wrap';
+    const img = document.createElement('img');
+    img.src = src; img.loading='lazy';
+    img.onclick = ()=> downloadDataUrl(src, 'id_preview_'+i+'.jpg');
+    const btn = document.createElement('button');
+    btn.type='button'; btn.textContent='×';
+    btn.onclick = ()=>{ removeIdPhoto(i); };
+    wrap.appendChild(img); wrap.appendChild(btn);
+    grid.appendChild(wrap);
+  });
+}
+function removeIdPhoto(i){ idPhotos.splice(i,1); renderIdPhotos(); }
+function clearIdPhotos(){ idPhotos = []; renderIdPhotos(); const el=document.getElementById('idPhotoInput'); if(el) el.value=''; }
+function compressImageFile(file){
+  return new Promise((resolve)=>{
+    const reader = new FileReader();
+    reader.onload = ev=>{
+      const img = new Image();
+      img.onload = ()=>{
+        const maxW = 1280;
+        const scale = Math.min(1, maxW / img.width);
+        const c = document.createElement('canvas');
+        c.width = img.width * scale; c.height = img.height * scale;
+        const ctx = c.getContext('2d');
+        ctx.drawImage(img,0,0,c.width,c.height);
+        // higher quality for ID readability
+        resolve(c.toDataURL('image/jpeg', 0.82));
       };
-      rec.rawCheckIn = convertDisplayDateToRaw(rec.checkin);
-      rec.rawCheckOut = convertDisplayDateToRaw(rec.checkout);
-      restored.push(rec);
-    }
-    records = restored;
-    localStorage.setItem('records', JSON.stringify(records));
-    regCounter = getNextRegCounter(records);
-    localStorage.setItem('regCounter', regCounter);
-    filterRecords();
-    alert('Backup restored successfully!');
-    event.target.value = ''; // clear selected file
-  };
-  reader.readAsText(file);
+      img.src = ev.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
 }
-
-// Edit modal related code
-const modal = document.getElementById('editModal');
-const closeModalBtn = document.getElementById('closeModal');
-closeModalBtn.onclick = () => modal.style.display = 'none';
-window.onclick = event => {
-  if (event.target === modal) {
-    modal.style.display = 'none';
+async function handleIdPhotoInput(e){
+  const files = Array.from(e.target.files || []);
+  for(const file of files){
+    try{
+      const dataUrl = await compressImageFile(file);
+      idPhotos.push(dataUrl);
+    }catch(err){ console.error(err); }
   }
-};
-
-function openEditModal(regNo) {
-  const rec = records.find(r => r.regNo === regNo);
-  if (!rec) return alert("Record not found");
-  const form = document.getElementById('editForm');
-  form.regNo.value = rec.regNo;
-  form.name.value = rec.name;
-  form.phone.value = rec.phone;
-  form.address.value = rec.address;
-  form.city.value = rec.city;
-  form.pin.value = rec.pin;
-  form.adults.value = rec.adults;
-  form.children.value = rec.children;
-  form.comingFrom.value = rec.comingFrom;
-  form.goingTo.value = rec.goingTo;
-  form.plan.value = rec.plan;
-  form.rooms.value = rec.rooms;
-  form.roomNo.value = rec.roomNo;
-  form.vehicle.value = rec.vehicle;
-  form.bookingRef.value = rec.bookingRef;
-  form.checkin.value = rec.rawCheckIn;
-  form.checkout.value = rec.rawCheckOut;
-  modal.style.display = 'block';
+  renderIdPhotos();
+  e.target.value='';
+}
+function downloadDataUrl(dataUrl, filename){
+  const a = document.createElement('a');
+  a.href = dataUrl; a.download = filename;
+  document.body.appendChild(a); a.click(); a.remove();
 }
 
-// Edit form submission
-document.getElementById('editForm').addEventListener('submit', e => {
-  e.preventDefault();
-  const form = e.target;
-  const regNo = form.regNo.value;
-  const index = records.findIndex(r => r.regNo === regNo);
-  if (index === -1) return alert("Record not found");
+// --- Validation ---
+function validateDates(checkin, checkout){
+  if(!checkin ||!checkout) return 'Check-in and Check-out dates are required';
+  const ci = new Date(checkin);
+  const co = new Date(checkout);
+  if(isNaN(ci) || isNaN(co)) return 'Invalid date format';
+  if(co < ci) return 'Check-out date must be on or after Check-in date';
+  return '';
+}
+function validateRecord(r, isNew=true){
+  if(!r.name || r.name.trim().length < 2) return 'Name is required';
+  if(!r.phone ||!/^[0-9]{10,15}$/.test(r.phone.replace(/\D/g,''))) return 'Valid phone number is required';
+  if(!r.roomNo) return 'Room Number is required';
+  const dateErr = validateDates(r.checkin, r.checkout);
+  if(dateErr) return dateErr;
+  if(!r.checkin ||!r.checkout) return 'Check-in / Check-out required';
+  return '';
+}
 
-  const old = records[index];
-  const oldTimePart = (old.checkin && old.checkin.split(' ')[1]) ? old.checkin.split(' ')[1] : null;
+// --- Room Occupancy Check ---
+async function checkRoomConflict(roomNo, checkin, checkout, excludeRegNo=null){
+  if(!roomNo) return null;
+  const all = await idbGetAll('guests');
+  const ci = new Date(checkin + 'T14:00:00');
+  const co = new Date(checkout + 'T12:00:00');
+  for(const g of all){
+    if(excludeRegNo && g.regNo === excludeRegNo) continue;
+    if(g.checkedOut) continue;
+    if(String(g.roomNo||'').toLowerCase()!== String(roomNo).toLowerCase()) continue;
+    const gci = new Date((g.checkin||'2000-01-01') + 'T14:00:00');
+    const gco = new Date((g.checkout||'2099-12-31') + 'T12:00:00');
+    // overlap?
+    if(ci < gco && co > gci){
+      return g;
+    }
+  }
+  return null;
+}
 
-  records[index] = {
-    regNo,
-    name: form.name.value.toLowerCase(),
-    phone: form.phone.value.toLowerCase(),
-    address: form.address.value.toLowerCase(),
-    city: form.city.value.toLowerCase(),
-    pin: form.pin.value.toLowerCase(),
-    adults: parseInt(form.adults.value),
-    children: parseInt(form.children.value),
-    comingFrom: form.comingFrom.value.toLowerCase(),
-    goingTo: form.goingTo.value.toLowerCase(),
-    plan: form.plan.value.toLowerCase(),
-    rooms: parseInt(form.rooms.value),
-    roomNo: form.roomNo.value.toLowerCase(),
-    vehicle: form.vehicle.value.toLowerCase(),
-    bookingRef: form.bookingRef.value.toLowerCase(),
-    checkin: formatCheckinDateFromTimeStr(form.checkin.value, oldTimePart),
-    checkout: formatDate(form.checkout.value),
-    rawCheckIn: form.checkin.value,
-    rawCheckOut: form.checkout.value
+// --- Check-In ---
+async function doCheckIn(formData){
+  const err = validateRecord(formData, true);
+  if(err){ alert(err); return false; }
+  // get fresh regNo
+  await refreshRegCounter();
+  let regNo = formatRegNo(regCounter);
+  // ensure uniqueness
+  let exists = await idbGet('guests', regNo);
+  let tries=0;
+  while(exists && tries < 20){
+    regCounter++;
+    regNo = formatRegNo(regCounter);
+    exists = await idbGet('guests', regNo);
+    tries++;
+  }
+  formData.regNo = regNo;
+  // room conflict check
+  const conflict = await checkRoomConflict(formData.roomNo, formData.checkin, formData.checkout, null);
+  if(conflict){
+    const ok = confirm(`Room ${escapeHtml(formData.roomNo)} already occupied by ${conflict.name} (${conflict.regNo}, ${conflict.checkin} to ${conflict.checkout}).\n\nContinue anyway?`);
+    if(!ok) return false;
+  }
+  await idbPut('guests', formData);
+  regCounter++;
+  await idbPutMeta('regCounter', regCounter);
+  return true;
+}
+
+// --- Duplicate Guest Detection ---
+let lastPhoneCheck = '';
+async function checkDuplicatePhone(phone){
+  if(!phone || phone.length < 10) return;
+  if(phone === lastPhoneCheck) return;
+  lastPhoneCheck = phone;
+  const all = await idbGetAll('guests');
+  const prev = all.reverse().find(r=> (r.phone||'').replace(/\D/g,'').includes(phone.replace(/\D/g,'')));
+  const box = document.getElementById('dupGuestBox');
+  if(!box) return;
+  if(prev){
+    box.style.display='block';
+    box.innerHTML = `<b>Previous guest found:</b> ${escapeHtml(prev.name)} — Last stay ${escapeHtml(prev.checkin||'')} Room ${escapeHtml(prev.roomNo||'')}<br>
+      <button type="button" class="btn btn-small" id="dupFillBtn">Auto-fill details</button>
+      <button type="button" class="btn btn-secondary btn-small" onclick="this.parentElement.style.display='none'">Ignore</button>`;
+    document.getElementById('dupFillBtn').onclick = ()=>{
+      const f = document.getElementById('checkInForm');
+      if(f){
+        f.name.value = prev.name||'';
+        f.address.value = prev.address||'';
+        f.city.value = prev.city||'';
+        f.querySelector('[name="pin"]').value = prev.pin||'';
+      }
+      box.style.display='none';
+    };
+  } else {
+    box.style.display='none';
+  }
+}
+
+// --- In-House ---
+async function renderInHouse(){
+  const el = document.getElementById('inhouseList');
+  if(!el) return;
+  const {rows} = await dbGetGuests({inhouseOnly:true, offset:0, limit:200});
+  if(rows.length===0){ el.innerHTML = '<p class="muted">No guests in house.</p>'; return; }
+  el.innerHTML = rows.map(r=>`
+    <div class="guest-card">
+      <b>${escapeHtml(r.name)}</b> — Room ${escapeHtml(r.roomNo)} <span class="pill">${escapeHtml(r.regNo)}</span><br>
+      <span class="muted">${escapeHtml(r.phone)} · Checkout ${escapeHtml(r.checkout||'')}</span>
+      <div class="actions" style="margin-top:8px">
+        <button class="btn btn-small" onclick="printRegCard('${escapeHtml(r.regNo)}')">Print Card</button>
+        <button class="btn btn-secondary btn-small" onclick="downloadIdPhotos('${escapeHtml(r.regNo)}')">Download IDs</button>
+        <button class="btn btn-small" style="background:#1a7f37" onclick="checkoutGuest('${escapeHtml(r.regNo)}')">Check Out</button>
+      </div>
+    </div>`).join('');
+}
+// --- Records ---
+let searchDebounce;
+function filterRecords(page=0){
+  clearTimeout(searchDebounce);
+  searchDebounce = setTimeout(()=> doFilterRecords(page), 250);
+}
+async function doFilterRecords(page=0){
+  currentPage = page;
+  const qEl = document.getElementById('searchInput');
+  currentSearch = qEl? qEl.value.trim() : '';
+  const offset = page * PAGE_SIZE;
+  const {rows, total} = await dbGetGuests({search: currentSearch, offset, limit: PAGE_SIZE, inhouseOnly:false});
+  const el = document.getElementById('recordsList');
+  if(!el) return;
+  const totalPages = Math.ceil(total / PAGE_SIZE);
+  let html = rows.map(r=>{
+    const photos = r.idPhotos || [];
+    return `
+    <div class="guest-card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <b style="font-size:16px">${escapeHtml(r.name)}</b>
+        <span class="pill">${escapeHtml(r.regNo)}</span>
+      </div>
+      <div class="rec-grid">
+        <div class="rec-field"><b>Phone:</b> ${escapeHtml(r.phone||'-')}</div>
+        <div class="rec-field"><b>Room:</b> ${escapeHtml(r.roomNo||'-')} (${escapeHtml(r.rooms||'1')})</div>
+        <div class="rec-field"><b>Check-in:</b> ${escapeHtml(r.checkin||'-')}</div>
+        <div class="rec-field"><b>Check-out:</b> ${escapeHtml(r.checkout||'-')}</div>
+        <div class="rec-field"><b>Adults / Children:</b> ${escapeHtml(r.adults||'-')} / ${escapeHtml(r.children||'0')}</div>
+        <div class="rec-field"><b>Plan:</b> ${escapeHtml(r.plan||'-')}</div>
+        <div class="rec-field"><b>City:</b> ${escapeHtml(r.city||'-')}</div>
+        <div class="rec-field"><b>Pin:</b> ${escapeHtml(r.pin||'-')}</div>
+        <div class="rec-field" style="grid-column:1/-1"><b>Address:</b> ${escapeHtml(r.address||'-')}</div>
+        <div class="rec-field"><b>Coming From:</b> ${escapeHtml(r.comingFrom||'-')}</div>
+        <div class="rec-field"><b>Going To:</b> ${escapeHtml(r.goingTo||'-')}</div>
+        <div class="rec-field"><b>Vehicle:</b> ${escapeHtml(r.vehicleNo||'-')}</div>
+        <div class="rec-field"><b>Booking:</b> ${escapeHtml(r.bookingRef||'-')} ${escapeHtml(r.bookingId||'')}</div>
+        <div class="rec-field"><b>ID Type:</b> ${escapeHtml(r.idType||'-')}</div>
+        <div class="rec-field"><b>Check-in Time:</b> ${escapeHtml(r.checkinTime||'-')}</div>
+        ${r.actualCheckoutTime? `<div class="rec-field"><b>Actual Checkout:</b> ${escapeHtml(r.actualCheckoutTime)}</div>` : ''}
+      </div>
+      ${photos.length? `<div class="rec-photos" style="margin-top:6px">` + photos.map((p,i)=>`<img src="${escapeHtml(p)}" loading="lazy" style="width:70px;height:50px;object-fit:cover;border-radius:6px;border:1px solid #ddd;margin-right:4px;cursor:pointer" onclick="window.open('${p.replace(/'/g,"\\'")}')">`).join('') + `</div>` : ''}
+      ${r.signature? `<div style="margin-top:4px"><small class="muted">Signature:</small><br><img src="${r.signature}" style="height:40px;border:1px solid #ddd;border-radius:4px" loading="lazy"></div>` : ''}
+      <div class="actions" style="margin-top:10px">
+        <button class="btn btn-small" onclick="printRegCard('${escapeHtml(r.regNo)}')">Print Card</button>
+        <button class="btn btn-secondary btn-small" onclick="downloadIdPhotos('${escapeHtml(r.regNo)}')">Download IDs</button>
+        ${r.checkedOut? '' : `<button class="btn btn-small" style="background:#1a7f37" onclick="checkoutGuest('${escapeHtml(r.regNo)}')">Check Out</button>`}
+        <button class="btn btn-secondary btn-small" onclick="editRecord('${escapeHtml(r.regNo)}')">Edit</button>
+        <button class="btn btn-danger btn-small" onclick="deleteRecord('${escapeHtml(r.regNo)}')">Del</button>
+      </div>
+    </div>`;
+  }).join('') || '<p class="muted">No records</p>';
+
+  // pagination controls
+  if(total > PAGE_SIZE){
+    html += `<div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px" class="muted">
+      <button class="btn btn-secondary btn-small" ${page===0?'disabled':''} onclick="doFilterRecords(${page-1})">Prev</button>
+      <span>Page ${page+1} / ${totalPages} — ${total} records</span>
+      <button class="btn btn-secondary btn-small" ${(page+1)>=totalPages?'disabled':''} onclick="doFilterRecords(${page+1})">Next</button>
+    </div>`;
+  }
+  el.innerHTML = html;
+}
+
+// --- Edit Record (full) ---
+let editRegNo = null;
+let editPhotos = [];
+let editSignatureData = '';
+
+async function editRecord(regNo){
+  if(!verifyPassword('edit this record')) return;
+  const r = await idbGet('guests', regNo);
+  if(!r){ alert('Record not found'); return; }
+  editRegNo = regNo;
+  editPhotos = [...(r.idPhotos||[])];
+  editSignatureData = r.signature||'';
+  // fill edit form
+  const fields = ['name','phone','address','city','pin','checkin','checkout','adults','children','roomNo','rooms','plan','vehicleNo','bookingRef','bookingId','comingFrom','goingTo','idType'];
+  fields.forEach(f=>{
+    const el = document.getElementById('edit_'+f);
+    if(el) el.value = r[f]||'';
+  });
+  renderEditPhotos();
+  renderEditSignature();
+  document.getElementById('editModal').style.display='block';
+}
+function renderEditPhotos(){
+  const grid = document.getElementById('editPhotoGrid');
+  if(!grid) return;
+  grid.innerHTML='';
+  editPhotos.forEach((src,i)=>{
+    const wrap = document.createElement('div');
+    wrap.className='id-thumb-wrap';
+    wrap.innerHTML = `<img src="${escapeHtml(src)}" style="width:110px;height:80px;object-fit:cover;border-radius:8px;border:1px solid #ccc"><button type="button" onclick="editRemovePhoto(${i})">×</button>`;
+    grid.appendChild(wrap);
+  });
+}
+function editRemovePhoto(i){ editPhotos.splice(i,1); renderEditPhotos(); }
+async function editAddPhotos(e){
+  const files = Array.from(e.target.files||[]);
+  for(const file of files){
+    const dataUrl = await compressImageFile(file);
+    editPhotos.push(dataUrl);
+  }
+  renderEditPhotos();
+  e.target.value='';
+}
+// edit signature pad
+let editSigCanvas, editSigCtx, editSigDrawing=false;
+function renderEditSignature(){
+  editSigCanvas = document.getElementById('editSigPad');
+  if(!editSigCanvas) return;
+  editSigCtx = editSigCanvas.getContext('2d');
+  editSigCtx.lineWidth=2; editSigCtx.lineCap='round';
+  function pos(e){ const r=editSigCanvas.getBoundingClientRect(); const t=e.touches?e.touches[0]:e; return {x:t.clientX-r.left, y:t.clientY-r.top}; }
+  editSigCanvas.onmousedown = e=>{ editSigDrawing=true; const p=pos(e); editSigCtx.beginPath(); editSigCtx.moveTo(p.x,p.y); };
+  editSigCanvas.onmousemove = e=>{ if(!editSigDrawing) return; const p=pos(e); editSigCtx.lineTo(p.x,p.y); editSigCtx.stroke(); };
+  window.addEventListener('mouseup', ()=> editSigDrawing=false);
+  editSigCanvas.ontouchstart = e=>{ e.preventDefault(); editSigDrawing=true; const p=pos(e); editSigCtx.beginPath(); editSigCtx.moveTo(p.x,p.y); };
+  editSigCanvas.ontouchmove = e=>{ e.preventDefault(); if(!editSigDrawing) return; const p=pos(e); editSigCtx.lineTo(p.x,p.y); editSigCtx.stroke(); };
+  editSigCanvas.ontouchend = ()=> editSigDrawing=false;
+  // restore existing
+  if(editSignatureData){
+    const img = new Image();
+    img.onload = ()=> editSigCtx.drawImage(img,0,0,editSigCanvas.width, editSigCanvas.height);
+    img.src = editSignatureData;
+  }
+}
+function clearEditSignature(){ if(editSigCtx){ editSigCtx.clearRect(0,0,editSigCanvas.width, editSigCanvas.height); editSignatureData=''; } }
+async function saveEditRecord(){
+  const r = await idbGet('guests', editRegNo);
+  if(!r){ alert('Record gone'); return; }
+  const get = id=> (document.getElementById('edit_'+id)||{}).value || '';
+  const updated = {...r,
+    name: get('name').trim(),
+    phone: get('phone').trim(),
+    address: get('address').trim(),
+    city: get('city').trim(),
+    pin: get('pin').trim(),
+    checkin: get('checkin'),
+    checkout: get('checkout'),
+    adults: get('adults'),
+    children: get('children'),
+    roomNo: get('roomNo'),
+    rooms: get('rooms'),
+    plan: get('plan'),
+    vehicleNo: get('vehicleNo'),
+    bookingRef: get('bookingRef'),
+    bookingId: get('bookingId'),
+    comingFrom: get('comingFrom'),
+    goingTo: get('goingTo'),
+    idType: get('idType'),
+    idPhotos: [...editPhotos]
   };
+  // signature: if canvas has new drawing, use it, else keep existing
+  try{
+    const sigData = editSigCanvas.toDataURL('image/png');
+    // check if canvas is blank by comparing to blank
+    const blank = document.createElement('canvas'); blank.width=editSigCanvas.width; blank.height=editSigCanvas.height;
+    if(sigData!== blank.toDataURL()){
+      updated.signature = sigData;
+    } else if(editSignatureData){
+      updated.signature = editSignatureData;
+    }
+  }catch(e){}
+  const err = validateRecord(updated, false);
+  if(err){ alert(err); return; }
+  // room conflict check
+  const conflict = await checkRoomConflict(updated.roomNo, updated.checkin, updated.checkout, updated.regNo);
+  if(conflict){
+    const ok = confirm(`Room ${updated.roomNo} already occupied by ${conflict.name} (${conflict.regNo}).\nContinue anyway?`);
+    if(!ok) return;
+  }
+  await idbPut('guests', updated);
+  document.getElementById('editModal').style.display='none';
+  alert('Record updated');
+  doFilterRecords(currentPage);
+  renderInHouse();
+}
 
-  localStorage.setItem('records', JSON.stringify(records));
-  modal.style.display = 'none';
-  filterRecords();
-});
+async function deleteRecord(regNo){
+  if(!verifyPassword('delete this record')) return;
+  if(!confirm('Delete '+regNo+'? This cannot be undone.')) return;
+  await idbDelete('guests', regNo);
+  doFilterRecords(currentPage);
+  renderInHouse();
+}
 
-// Auto-refresh every 10 minutes to update in house removal and records
-setInterval(() => {
-  records = JSON.parse(localStorage.getItem('records')) || [];
-  filterRecords();
-}, 600000);
+// --- Checkout ---
+async function checkoutGuest(regNo){
+  const r = await idbGet('guests', regNo);
+  if(!r) return;
+  if(!confirm(`Check out ${r.name} (Room ${r.roomNo}) now?`)) return;
+  r.checkedOut = true;
+  r.actualCheckoutTime = new Date().toLocaleString();
+  await idbPut('guests', r);
+  renderInHouse();
+  doFilterRecords(currentPage);
+  alert('Checked out: ' + r.name);
+}
 
-filterRecords();
-showSection('checkIn');
+// --- Download ID Photos ---
+async function downloadIdPhotos(regNo){
+  const r = await idbGet('guests', regNo);
+  if(!r) return;
+  const photos = r.idPhotos || [];
+  if(photos.length===0){ alert('No ID photos for this guest'); return; }
+  const base = safeName(r.regNo + '_' + r.name);
+  for(let i=0;i<photos.length;i++){
+    await new Promise(res=> setTimeout(res, 200));
+    downloadDataUrl(photos[i], `${base}_ID_${i+1}.jpg`);
+  }
+}
+
+// --- Print Registration Card ---
+let currentPrintReg = null;
+async function printRegCard(regNo){
+  const r = await idbGet('guests', regNo);
+  if(!r) return;
+  currentPrintReg = r;
+  const s = SETTINGS;
+  const photos = r.idPhotos || [];
+  const card = `
+  <div class="rc-print">
+    <h2>${escapeHtml(s.hotelName)}</h2>
+    <p style="text-align:center;margin:0;font-size:12px">${escapeHtml(s.hotelAddress)}</p>
+    <h3>Guest Registration Card</h3>
+    <hr style="margin:6px 0">
+    <div class="rc-line"><b>Reg No:</b> ${escapeHtml(r.regNo)} &nbsp; | &nbsp; <b>Date:</b> ${escapeHtml(r.checkinTime||'')}</div>
+    <div class="rc-line"><b>Name:</b> ${escapeHtml(r.name)} &nbsp; | &nbsp; <b>Phone:</b> ${escapeHtml(r.phone)}</div>
+    <div class="rc-line"><b>Address:</b> ${escapeHtml(r.address||'')}, ${escapeHtml(r.city||'')} ${escapeHtml(r.pin||'')}</div>
+    <div class="rc-line"><b>Check-in:</b> ${escapeHtml(r.checkin)} &nbsp; | &nbsp; <b>Check-out:</b> ${escapeHtml(r.checkout)} &nbsp; | &nbsp; <b>Room:</b> ${escapeHtml(r.roomNo)} (${escapeHtml(r.rooms||'1')})</div>
+    <div class="rc-line"><b>Persons:</b> ${escapeHtml(r.adults)} Adults, ${escapeHtml(r.children||'0')} Children &nbsp; | &nbsp; <b>Plan:</b> ${escapeHtml(r.plan||'')}</div>
+    <div class="rc-line"><b>Booking:</b> ${escapeHtml(r.bookingRef||'')} ${escapeHtml(r.bookingId||'')} &nbsp; | &nbsp; <b>Vehicle:</b> ${escapeHtml(r.vehicleNo||'')}</div>
+    <div class="rc-line"><b>Coming From:</b> ${escapeHtml(r.comingFrom||'')} &nbsp; | &nbsp; <b>Going To:</b> ${escapeHtml(r.goingTo||'')}</div>
+    <div class="rc-line"><b>ID Type:</b> ${escapeHtml(r.idType||'')}</div>
+    ${photos.length? `<div style="margin:4px 0"><b>ID Photos:</b><br>` + photos.slice(0,4).map(p=>`<img src="${escapeHtml(p)}" class="idp" loading="lazy">`).join('') + (photos.length>4?` <small>+${photos.length-4} more</small>`:'') + `</div>` : ''}
+    ${r.signature? `<div><b>Guest Signature:</b><br><img src="${r.signature}" class="sig-img"></div>` : ''}
+    <hr style="margin:6px 0">
+    <p style="font-size:11px;color:#333">${escapeHtml(s.terms||'')}</p>
+    <div style="display:flex;justify-content:space-between;margin-top:28px;font-size:12px">
+      <div style="width:45%;border-top:1px solid #333;text-align:center;padding-top:4px">Guest Signature</div>
+      <div style="width:45%;border-top:1px solid #333;text-align:center;padding-top:4px">Reception</div>
+    </div>
+  </div>`;
+  document.getElementById('printCardArea').innerHTML = card;
+  document.getElementById('printModal').style.display='block';
+}
+function closePrintModal(){ document.getElementById('printModal').style.display='none'; }
+async function downloadRegCardPDF(){
+  if(!currentPrintReg) return;
+  const { jsPDF } = window.jspdf;
+  const r = currentPrintReg;
+  const s = SETTINGS;
+  const doc = new jsPDF();
+  let y=20;
+  doc.setFontSize(16); doc.text(s.hotelName, 105, y, {align:'center'}); y+=7;
+  doc.setFontSize(10); doc.text(s.hotelAddress, 105, y, {align:'center'}); y+=8;
+  doc.setFontSize(13); doc.text('Guest Registration Card', 105, y, {align:'center'}); y+=8;
+  doc.setFontSize(10);
+  const lines = [
+    `Reg No: ${r.regNo} Date: ${r.checkinTime||''}`,
+    `Name: ${r.name} Phone: ${r.phone}`,
+    `Address: ${r.address||''}, ${r.city||''} ${r.pin||''}`,
+    `Check-in: ${r.checkin} Check-out: ${r.checkout} Room: ${r.roomNo}`,
+    `Persons: ${r.adults} Adults, ${r.children||0} Children Plan: ${r.plan||''}`,
+    `Booking: ${r.bookingRef||''} ${r.bookingId||''} Vehicle: ${r.vehicleNo||''}`,
+    `Coming From: ${r.comingFrom||''} Going To: ${r.goingTo||''}`,
+    `ID Type: ${r.idType||''}`
+  ];
+  lines.forEach(l=>{ doc.text(l, 14, y); y+=6; });
+  y+=4;
+  doc.setFontSize(9); const terms = (s.terms||'').split('. ').join('.\n');
+  doc.text(doc.splitTextToSize(terms, 180), 14, y);
+  y+=30;
+  doc.text('Guest Signature ____________________', 14, y);
+  doc.text('Reception ____________________', 120, y);
+  doc.save(`${safeName(r.regNo+'_'+r.name)}_regcard.pdf`);
+}
+
+// --- Export / Backup ---
+function recordsToSheetData(list){
+  return list.map(r=>({
+    RegNo: r.regNo, Name: r.name, Phone: r.phone, Address: r.address, City: r.city, Pin: r.pin,
+    Checkin: r.checkin, Checkout: r.checkout, Adults: r.adults, Children: r.children,
+    ComingFrom: r.comingFrom, GoingTo: r.goingTo, Plan: r.plan, Rooms: r.rooms, RoomNo: r.roomNo,
+    VehicleNo: r.vehicleNo, BookingRef: r.bookingRef, BookingId: r.bookingId,
+    IDType: r.idType, IDPhotoCount: (r.idPhotos||[]).length,
+    CheckinTime: r.checkinTime, ActualCheckoutTime: r.actualCheckoutTime||'', CheckedOut: r.checkedOut? 'Yes':''
+  }));
+}
+async function exportXLSX(all){
+  const q = (document.getElementById('searchInput')?.value || '').toLowerCase();
+  const {rows} = await dbGetGuests({search: all? '' : q, offset:0, limit: 50000});
+  const ws = XLSX.utils.json_to_sheet(recordsToSheetData(rows));
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Guests');
+  // verify
+  const verify = XLSX.utils.sheet_to_json(ws);
+  if(verify.length!== rows.length){
+    alert('Export integrity warning: row count mismatch');
+  }
+  const date = todayISO();
+  XLSX.writeFile(wb, `${safeName(SETTINGS.hotelName)}_${date}.xlsx`);
+}
+
+async function exportFullJSON(){
+  const records = await idbGetAll('guests');
+  const data = {
+    version: '3.0',
+    hotel: SETTINGS.hotelName,
+    exported_at: new Date().toISOString(),
+    regCounter: await dbGetMaxReg().then(n=>n+1),
+    settings: SETTINGS,
+    records: records
+  };
+  const blob = new Blob([JSON.stringify(data)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `${safeName(SETTINGS.hotelName)}_full_backup_${todayISO()}.json`;
+  a.click();
+  setTimeout(()=> URL.revokeObjectURL(a.href), 2000);
+  alert('Full backup saved with ' + records.length + ' guests, including ID photos and signatures.');
+}
+
+// --- Restore ---
+function parseCsv(text){
+  const rows=[]; let cur=''; let row=[]; let inQ=false;
+  for(let i=0;i<text.length;i++){
+    const c=text[i], n=text[i+1];
+    if(c === '"'){
+      if(inQ && n === '"'){ cur+='"'; i++; continue; }
+      inQ =!inQ; continue;
+    }
+    if(!inQ && c === ','){ row.push(cur); cur=''; continue; }
+    if(!inQ && (c === '\n' || c === '\r')){
+      if(c === '\r' && n === '\n') i++;
+      row.push(cur); rows.push(row); row=[]; cur=''; continue;
+    }
+    cur += c;
+  }
+  if(cur!== '' || row.length) { row.push(cur); rows.push(row); }
+  if(rows.length===0) return [];
+  const headers = rows[0].map(h=>h.trim());
+  return rows.slice(1).filter(r=>r.some(x=>x.trim()!=='')).map(r=>{ const o={}; headers.forEach((h,i)=> o[h]=r[i]||''); return o; });
+}
+
+async function restoreBackup(input){
+  const file = input.files[0]; if(!file) return;
+  const name = file.name.toLowerCase();
+  try{
+    let rows=[];
+    let isFullJson=false;
+    if(name.endsWith('.json')){
+      const txt = await file.text();
+      const data = JSON.parse(txt);
+      rows = data.records || data || [];
+      isFullJson =!!data.records;
+    } else if(name.endsWith('.xlsx')){
+      const buf = await file.arrayBuffer();
+      const wb = XLSX.read(buf, {type:'array'});
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      rows = XLSX.utils.sheet_to_json(ws, {defval:''});
+    } else {
+      const txt = await file.text();
+      rows = parseCsv(txt);
+    }
+    // normalize
+    function getField(row,...keys){
+      for(const k of keys){
+        if(row[k]!== undefined && row[k]!== '') return row[k];
+        const lk = Object.keys(row).find(h => h.toLowerCase().replace(/[^a-z0-9]/g,'') === k.toLowerCase().replace(/[^a-z0-9]/g,''));
+        if(lk && row[lk]!== '') return row[lk];
+      }
+      return '';
+    }
+    const imported = [];
+    let skipped=0;
+    for(const row of rows){
+      try{
+        const regRaw = getField(row, 'RegNo','reg_no','Registration','Reg');
+        const rec = {
+          regNo: regRaw? formatRegNo(parseRegNo(regRaw)) : '',
+          name: getField(row, 'Name','name','GuestName'),
+          phone: String(getField(row, 'Phone','phone','Mobile','Contact')||''),
+          address: getField(row, 'Address','address'),
+          city: getField(row, 'City','city'),
+          pin: getField(row, 'Pin','pin','Pincode','zip'),
+          checkin: getField(row, 'Checkin','checkin','CheckInDate'),
+          checkout: getField(row, 'Checkout','checkout','CheckOutDate'),
+          adults: getField(row, 'Adults','adults') || '1',
+          children: getField(row, 'Children','children') || '0',
+          comingFrom: getField(row, 'ComingFrom','comingFrom','From'),
+          goingTo: getField(row, 'GoingTo','goingTo','To'),
+          plan: getField(row, 'Plan','plan') || 'EP',
+          rooms: getField(row, 'Rooms','rooms') || '1',
+          roomNo: getField(row, 'RoomNo','roomNo','Room'),
+          vehicleNo: getField(row, 'VehicleNo','vehicleNo','Vehicle'),
+          bookingRef: getField(row, 'BookingRef','bookingRef') || 'Walk In',
+          bookingId: getField(row, 'BookingId','bookingId','Remarks'),
+          idType: getField(row, 'IDType','idType','ID') || 'Aadhaar',
+          idPhotos: Array.isArray(row.idPhotos)? row.idPhotos : [],
+          signature: row.signature || '',
+          checkinTime: getField(row, 'CheckinTime','checkinTime'),
+          actualCheckoutTime: getField(row, 'ActualCheckoutTime','actualCheckoutTime'),
+          checkedOut: /yes|true|1/i.test(getField(row,'CheckedOut','checkedOut'))
+        };
+        // validate minimal
+        if(!rec.name ||!rec.phone){ skipped++; continue; }
+        // if regNo missing, will assign later
+        imported.push(rec);
+      }catch(e){ skipped++; }
+    }
+    if(imported.length===0){ alert('No valid guest rows found. Skipped: '+skipped); return; }
+    const mode = confirm(`Backup contains ${imported.length} guests (skipped ${skipped} bad).\n\nOK = Merge / Update existing\nCancel = Replace ALL records`)? 'merge' : 'replace';
+    let added=0, updated=0;
+    if(mode === 'replace'){
+      if(!confirm('Replace ALL current records? This cannot be undone.')) return;
+      await idbClear('guests');
+      for(let i=0;i<imported.length;i++){
+        const r = imported[i];
+        if(!r.regNo) r.regNo = formatRegNo(i+1);
+        await idbPut('guests', r);
+        added++;
+      }
+      // restore settings if present in JSON
+      try{
+        const txt = await file.text();
+        const data = JSON.parse(txt);
+        if(data.settings){ SETTINGS = {...SETTINGS,...data.settings}; localStorage.setItem('hotel_settings', JSON.stringify(SETTINGS)); loadSettings(); }
+        if(data.regCounter){ await idbPutMeta('regCounter', data.regCounter); }
+      }catch(e){}
+    } else {
+      for(const r of imported){
+        let reg = r.regNo && parseRegNo(r.regNo)? formatRegNo(parseRegNo(r.regNo)) : '';
+        const existing = reg? await idbGet('guests', reg) : null;
+        if(existing){
+          // update, keep photos/signature if backup doesn't have them
+          const merged = {...existing,...r, regNo: reg};
+          if(!r.idPhotos || r.idPhotos.length===0) merged.idPhotos = existing.idPhotos || [];
+          if(!r.signature) merged.signature = existing.signature || '';
+          await idbPut('guests', merged);
+          updated++;
+        } else {
+          if(!reg){
+            const max = await dbGetMaxReg();
+            reg = formatRegNo(max+1);
+          }
+          r.regNo = reg;
+          await idbPut('guests', r);
+          added++;
+        }
+      }
+    }
+    await refreshRegCounter();
+    doFilterRecords(0);
+    renderInHouse();
+    alert(`Restore complete.\nFound: ${imported.length}\nAdded: ${added}\nUpdated: ${updated}\nSkipped: ${skipped}\nNext Reg No: ${formatRegNo(regCounter)}\n\nNote: XLSX/CSV backups do not include ID photos/signatures – use JSON Full Backup for complete restore.`);
+  }catch(err){
+    alert('Restore failed: '+ err.message);
+    console.error(err);
+  }
+  input.value='';
+}
+// --- WhatsApp Day Report ---
+async function getDayList(dateStr){
+  const all = await idbGetAll('guests');
+  return all.filter(r=> r.checkin === dateStr).sort((a,b)=> parseRegNo(a.regNo)-parseRegNo(b.regNo));
+}
+async function updateWaCount(){
+  const d = document.getElementById('waDate');
+  if(!d ||!d.value) return;
+  const list = await getDayList(d.value);
+  document.getElementById('waCount').textContent = list.length + ' check-ins on ' + d.value;
+}
+async function dayReportXLSX(){
+  const date = document.getElementById('waDate').value;
+  if(!date){ alert('Pick a date'); return; }
+  const list = await getDayList(date);
+  if(!list.length){ alert('No check-ins on ' + date); return; }
+  const ws = XLSX.utils.json_to_sheet(recordsToSheetData(list));
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Day');
+  XLSX.writeFile(wb, `${safeName(SETTINGS.hotelName)}_${date}.xlsx`);
+}
+async function dayReportPDF(){
+  const date = document.getElementById('waDate').value;
+  if(!date){ alert('Pick a date'); return; }
+  const list = await getDayList(date);
+  if(!list.length){ alert('No check-ins on ' + date); return; }
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  doc.setFontSize(14);
+  doc.text(SETTINGS.hotelName + ' - Day Check-In Report', 14, 16);
+  doc.setFontSize(11);
+  doc.text('Date: ' + date + ' Guests: ' + list.length, 14, 24);
+  let y = 34; doc.setFontSize(9);
+  list.forEach((r,i)=>{
+    const line = `${i+1}. ${r.regNo} | ${r.name} | ${r.phone} | Room ${r.roomNo} | ${r.adults}A/${r.children||0}C`;
+    doc.text(line, 14, y); y+=6;
+    if(y > 270){ doc.addPage(); y=20; }
+  });
+  doc.save(`${safeName(SETTINGS.hotelName)}_${date}.pdf`);
+}
+async function shareDayWhatsApp(){
+  const date = document.getElementById('waDate').value;
+  if(!date){ alert('Pick a date'); return; }
+  const list = await getDayList(date);
+  if(!list.length){ alert('No check-ins on ' + date); return; }
+  const hotel = SETTINGS.hotelName;
+  // FIX: was \\n, now proper newlines
+  const text = `${hotel} - Check-In Report\nDate: ${date}\nGuests: ${list.length}\n\n` + list.map((r,i)=> `${i+1}. ${r.name} - Room ${r.roomNo} - ${r.phone}`).join('\n');
+  const ws = XLSX.utils.json_to_sheet(recordsToSheetData(list));
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Day');
+  const xlsxArray = XLSX.write(wb, {bookType:'xlsx', type:'array'});
+  const file = new File([xlsxArray], `${safeName(hotel)}_${date}.xlsx`, {type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+  if(navigator.canShare && navigator.canShare({files:[file]})){
+    try{ await navigator.share({ files:[file], title: hotel+' '+date, text }); return; }catch(e){}
+  }
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(file); a.download = file.name; a.click();
+  setTimeout(()=> URL.revokeObjectURL(a.href), 2000);
+  // FIX: was /\\D/g, now /\D/g
+  const waNum = (document.getElementById('waNumber').value || '').replace(/\D/g,'');
+  // FIX: was \\n\\n, now proper newlines
+  const waText = encodeURIComponent(text + '\n\nXLSX downloaded - attach it in WhatsApp.');
+  const waUrl = waNum? `https://wa.me/${waNum}?text=${waText}` : `https://wa.me/?text=${waText}`;
+  window.open(waUrl, '_blank');
+}
+
+// --- Settings ---
+function loadSettings(){
+  const set = (id,val)=>{ const el=document.getElementById(id); if(el) el.value = val||''; };
+  set('set_hotelName', SETTINGS.hotelName);
+  set('set_hotelAddress', SETTINGS.hotelAddress);
+  set('set_password', SETTINGS.password);
+  set('set_terms', SETTINGS.terms);
+  const h = document.getElementById('hotelNameHeader'); if(h) h.textContent = SETTINGS.hotelName;
+}
+function saveSettings(){
+  SETTINGS.hotelName = document.getElementById('set_hotelName').value;
+  SETTINGS.hotelAddress = document.getElementById('set_hotelAddress').value;
+  SETTINGS.password = document.getElementById('set_password').value;
+  SETTINGS.terms = document.getElementById('set_terms').value;
+  localStorage.setItem('hotel_settings', JSON.stringify(SETTINGS));
+  const h = document.getElementById('hotelNameHeader'); if(h) h.textContent = SETTINGS.hotelName;
+  alert('Settings saved');
+  idbPut('meta', {key:'settings', value: SETTINGS}).catch(()=>{});
+}
+async function resetAllData(){
+  if(!verifyPassword('reset ALL guest entries')) return;
+  // FIX: was \\n, now proper newline
+  const confirmText = prompt('This will DELETE ALL guest records and photos permanently.\nType DELETE to confirm:');
+  if(confirmText!== 'DELETE'){ alert('Cancelled'); return; }
+  await idbClear('guests');
+  regCounter = 1;
+  await idbPutMeta('regCounter', 1);
+  alert('All guest entries cleared. Reg counter reset to HP0001.');
+  doFilterRecords(0); renderInHouse(); refreshRegCounter();
+  showTab('checkinTab');
+}
+
+// meta helper
+async function idbPutMeta(key, value){
+  try{ await idbPut('meta', {key, value}); }catch(e){}
+}
+async function idbGetMeta(key){
+  try{ const r = await idbGet('meta', key); return r? r.value : null; }catch(e){ return null; }
+}
+
+// --- Init ---
+async function initApp(){
+  await idbOpen();
+  await migrateFromLocalStorage();
+  loadSettings();
+  initSignature();
+  // wire up id photo input
+  const idInput = document.getElementById('idPhotoInput');
+  if(idInput) idInput.addEventListener('change', handleIdPhotoInput);
+  // check-in form
+  const form = document.getElementById('checkInForm');
+  if(form){
+    form.addEventListener('submit', async e=>{
+      e.preventDefault();
+      const f = e.target;
+      const data = {
+        name: f.name.value.trim(),
+        phone: f.phone.value.trim(),
+        address: f.address.value.trim(),
+        city: f.city.value.trim(),
+        pin: f.pin.value.trim(),
+        checkin: f.checkin.value,
+        checkout: f.checkout.value,
+        adults: f.adults.value,
+        children: f.children.value,
+        comingFrom: f.comingFrom.value,
+        goingTo: f.goingTo.value,
+        plan: f.plan.value,
+        rooms: f.rooms.value,
+        roomNo: f.roomNo.value,
+        vehicleNo: f.vehicleNo.value,
+        bookingRef: f.bookingRef.value,
+        bookingId: f.bookingId.value,
+        idType: f.idType.value,
+        idPhotos: [...idPhotos],
+        signature: getSignatureData(),
+        checkinTime: new Date().toLocaleString(),
+        checkedOut: false
+      };
+      const ok = await doCheckIn(data);
+      if(ok){
+        alert('Checked in: ' + data.regNo + ' — ' + data.name);
+        f.reset();
+        clearSignature(); clearIdPhotos();
+        const dupBox = document.getElementById('dupGuestBox'); if(dupBox) dupBox.style.display='none';
+        f.adults.value = 2; f.children.value = 0; f.rooms.value = 1;
+        await refreshRegCounter();
+        renderInHouse();
+      }
+    });
+    // duplicate phone check
+    const phoneEl = form.querySelector('input[name="phone"]');
+    if(phoneEl){
+      let t;
+      phoneEl.addEventListener('input', ()=>{ clearTimeout(t); t=setTimeout(()=> checkDuplicatePhone(phoneEl.value.trim()), 400); });
+      phoneEl.addEventListener('blur', ()=> checkDuplicatePhone(phoneEl.value.trim()));
+    }
+  }
+  // search input
+  const searchEl = document.getElementById('searchInput');
+  if(searchEl){
+    searchEl.addEventListener('input', ()=> filterRecords(0));
+  }
+  // wa date
+  const waDate = document.getElementById('waDate');
+  if(waDate){ waDate.valueAsDate = new Date(); waDate.addEventListener('change', updateWaCount); updateWaCount(); }
+  await refreshRegCounter();
+  doFilterRecords(0);
+  renderInHouse();
+  // PWA
+  if('serviceWorker' in navigator){
+    const swCode = `self.addEventListener('install',e=>{self.skipWaiting()}); self.addEventListener('fetch',e=>{});`;
+    const swBlob = new Blob([swCode], {type:'text/javascript'});
+    navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(()=>{});
+  }
+  const manifest = { name: SETTINGS.hotelName + " Check-In", short_name: "Hotel Check-In", start_url: ".", display: "standalone", background_color: "#f4f6f8", theme_color: "#003366", icons: [] };
+  const mf = document.getElementById('manifest-link');
+  if(mf) mf.href = 'data:application/manifest+json,' + encodeURIComponent(JSON.stringify(manifest));
+  let deferredPrompt;
+  window.addEventListener('beforeinstallprompt', e=>{ e.preventDefault(); deferredPrompt=e; const b=document.getElementById('installBtn'); if(b) b.style.display='block'; });
+  const installBtn = document.getElementById('installBtn');
+  if(installBtn) installBtn.onclick = async ()=>{ if(deferredPrompt){ deferredPrompt.prompt(); } };
+}
+document.addEventListener('DOMContentLoaded', initApp);
+
+// expose globals for inline onclick handlers
+window.showTab = showTab;
+window.clearSignature = clearSignature;
+window.clearIdPhotos = clearIdPhotos;
+window.printRegCard = printRegCard;
+window.closePrintModal = closePrintModal;
+window.downloadRegCardPDF = downloadRegCardPDF;
+window.downloadIdPhotos = downloadIdPhotos;
+window.editRecord = editRecord;
+window.deleteRecord = deleteRecord;
+window.checkoutGuest = checkoutGuest;
+window.filterRecords = ()=> doFilterRecords(0);
+window.exportXLSX = exportXLSX;
+window.exportFullJSON = exportFullJSON;
+window.restoreBackup = restoreBackup;
+window.saveSettings = saveSettings;
+window.resetAllData = resetAllData;
+window.shareInHouse = async function(){
+  const {rows} = await dbGetGuests({inhouseOnly:true, offset:0, limit:500});
+  let html = `<!DOCTYPE html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>In-House - ${escapeHtml(SETTINGS.hotelName)}</title><body style="font-family:Arial;padding:16px"><h2>${escapeHtml(SETTINGS.hotelName)} — In House</h2><p>Snapshot: ${new Date().toLocaleString()}</p><table border="1" cellpadding="6" cellspacing="0"><tr><th>Reg</th><th>Name</th><th>Room</th><th>Phone</th><th>Checkout</th></tr>`;
+  rows.forEach(r=>{ html += `<tr><td>${escapeHtml(r.regNo)}</td><td>${escapeHtml(r.name)}</td><td>${escapeHtml(r.roomNo)}</td><td>${escapeHtml(r.phone)}</td><td>${escapeHtml(r.checkout)}</td></tr>`});
+  html += '</table></body>';
+  const blob = new Blob([html], {type:'text/html'});
+  const url = URL.createObjectURL(blob);
+  window.open(url, '_blank');
+};
+window.dayReportXLSX = dayReportXLSX;
+window.dayReportPDF = dayReportPDF;
+window.shareDayWhatsApp = shareDayWhatsApp;
+window.saveEditRecord = saveEditRecord;
+window.clearEditSignature = clearEditSignature;
+window.editRemovePhoto = editRemovePhoto;
+window.editAddPhotos = editAddPhotos;
+window.doFilterRecords = doFilterRecords;
+
 </script>
 </body>
 </html>
